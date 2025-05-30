@@ -213,8 +213,12 @@ export class MemStorage implements IStorage {
   async createVehicle(insertVehicle: InsertVehicle): Promise<Vehicle> {
     const id = this.currentId++;
     const vehicle: Vehicle = { 
-      ...insertVehicle, 
+      ...insertVehicle,
       id, 
+      ownerId: insertVehicle.ownerId || null,
+      driverId: insertVehicle.driverId || null,
+      mateId: insertVehicle.mateId || null,
+      isActive: insertVehicle.isActive ?? true,
       createdAt: new Date() 
     };
     this.vehicles.set(id, vehicle);
@@ -284,8 +288,15 @@ export class MemStorage implements IStorage {
   async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
     const id = this.currentId++;
     const transaction: Transaction = { 
-      ...insertTransaction, 
+      ...insertTransaction,
       id, 
+      passengerId: insertTransaction.passengerId || null,
+      vehicleId: insertTransaction.vehicleId || null,
+      mateId: insertTransaction.mateId || null,
+      driverId: insertTransaction.driverId || null,
+      ownerId: insertTransaction.ownerId || null,
+      status: insertTransaction.status || "completed",
+      paymentMethod: insertTransaction.paymentMethod || "momo",
       createdAt: new Date() 
     };
     this.transactions.set(id, transaction);
@@ -301,8 +312,12 @@ export class MemStorage implements IStorage {
   async createCommission(insertCommission: InsertCommission): Promise<Commission> {
     const id = this.currentId++;
     const commission: Commission = { 
-      ...insertCommission, 
+      ...insertCommission,
       id, 
+      ownerId: insertCommission.ownerId || null,
+      driverCommission: insertCommission.driverCommission || "15.00",
+      mateCommission: insertCommission.mateCommission || "10.00",
+      platformFee: insertCommission.platformFee || "5.00",
       createdAt: new Date() 
     };
     this.commissions.set(id, commission);

@@ -286,7 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find vehicle where user is mate - check all owners
       const allUsers = await storage.getAllUsers();
-      const owners = allUsers.filter(u => u.role === "owner");
+      const owners = allUsers.filter((u: User) => u.role === "owner");
       let vehicle = null;
 
       for (const owner of owners) {
@@ -328,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find vehicle where user is driver - check all owners
       const allUsers = await storage.getAllUsers();
-      const owners = allUsers.filter(u => u.role === "owner");
+      const owners = allUsers.filter((u: User) => u.role === "owner");
       let vehicle = null;
 
       for (const owner of owners) {
