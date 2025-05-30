@@ -6,6 +6,8 @@ import {
   type Transaction, type InsertTransaction,
   type Commission, type InsertCommission
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, gte } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -38,6 +40,140 @@ export interface IStorage {
   // Commissions
   getCommissionByOwnerId(ownerId: number): Promise<Commission | undefined>;
   createCommission(commission: InsertCommission): Promise<Commission>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
+    return user || undefined;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUserBalance(id: number, balance: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ momoBalance: balance })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getVehicle(id: number): Promise<Vehicle | undefined> {
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, id));
+    return vehicle || undefined;
+  }
+
+  async getVehicleByVehicleId(vehicleId: string): Promise<Vehicle | undefined> {
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.vehicleId, vehicleId));
+    return vehicle || undefined;
+  }
+
+  async getVehiclesByOwnerId(ownerId: number): Promise<Vehicle[]> {
+    return await db.select().from(vehicles).where(eq(vehicles.ownerId, ownerId));
+  }
+
+  async createVehicle(insertVehicle: InsertVehicle): Promise<Vehicle> {
+    const [vehicle] = await db
+      .insert(vehicles)
+      .values(insertVehicle)
+      .returning();
+    return vehicle;
+  }
+
+  async updateVehicle(id: number, updates: Partial<Vehicle>): Promise<Vehicle | undefined> {
+    const [vehicle] = await db
+      .update(vehicles)
+      .set(updates)
+      .where(eq(vehicles.id, id))
+      .returning();
+    return vehicle || undefined;
+  }
+
+  async getRoute(id: number): Promise<Route | undefined> {
+    const [route] = await db.select().from(routes).where(eq(routes.id, id));
+    return route || undefined;
+  }
+
+  async getRouteByName(name: string): Promise<Route | undefined> {
+    const [route] = await db.select().from(routes).where(eq(routes.name, name));
+    return route || undefined;
+  }
+
+  async getAllRoutes(): Promise<Route[]> {
+    return await db.select().from(routes);
+  }
+
+  async createRoute(insertRoute: InsertRoute): Promise<Route> {
+    const [route] = await db
+      .insert(routes)
+      .values(insertRoute)
+      .returning();
+    return route;
+  }
+
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
+    return transaction || undefined;
+  }
+
+  async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
+    return await db.select().from(transactions).where(eq(transactions.passengerId, userId));
+  }
+
+  async getTransactionsByVehicleId(vehicleId: number): Promise<Transaction[]> {
+    return await db.select().from(transactions).where(eq(transactions.vehicleId, vehicleId));
+  }
+
+  async getTodaysTransactionsByVehicleId(vehicleId: number): Promise<Transaction[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return await db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.vehicleId, vehicleId),
+          gte(transactions.createdAt, today)
+        )
+      );
+  }
+
+  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    const [transaction] = await db
+      .insert(transactions)
+      .values(insertTransaction)
+      .returning();
+    return transaction;
+  }
+
+  async getCommissionByOwnerId(ownerId: number): Promise<Commission | undefined> {
+    const [commission] = await db.select().from(commissions).where(eq(commissions.ownerId, ownerId));
+    return commission || undefined;
+  }
+
+  async createCommission(insertCommission: InsertCommission): Promise<Commission> {
+    const [commission] = await db
+      .insert(commissions)
+      .values(insertCommission)
+      .returning();
+    return commission;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -325,4 +461,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
