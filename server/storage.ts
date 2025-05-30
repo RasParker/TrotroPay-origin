@@ -11,6 +11,7 @@ export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByPhone(phone: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(id: number, balance: string): Promise<User | undefined>;
 
@@ -171,11 +172,16 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.phone === phone);
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
     const user: User = { 
-      ...insertUser, 
+      ...insertUser,
       id, 
+      momoBalance: insertUser.momoBalance || "0.00",
       createdAt: new Date() 
     };
     this.users.set(id, user);

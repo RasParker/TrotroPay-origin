@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { insertTransactionSchema } from "@shared/schema";
+import { insertTransactionSchema, type User } from "@shared/schema";
 import { z } from "zod";
+import "./types";
 
 const loginSchema = z.object({
   phone: z.string().min(10),
@@ -43,7 +44,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on('close', () => {
       // Remove connection from active connections
-      for (const [userId, connection] of activeConnections.entries()) {
+      const entries = Array.from(activeConnections.entries());
+      for (const [userId, connection] of entries) {
         if (connection === ws) {
           activeConnections.delete(userId);
           break;
@@ -282,9 +284,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Find vehicle where user is mate
-      const vehicles = await storage.getVehiclesByOwnerId(1); // Get all vehicles for now
-      const vehicle = Array.from(vehicles).find(v => v.mateId === userId);
+      // Find vehicle where user is mate - check all owners
+      const allUsers = await storage.getAllUsers();
+      const owners = allUsers.filter(u => u.role === "owner");
+      let vehicle = null;
+
+      for (const owner of owners) {
+        const ownerVehicles = await storage.getVehiclesByOwnerId(owner.id);
+        const foundVehicle = ownerVehicles.find(v => v.mateId === userId);
+        if (foundVehicle) {
+          vehicle = foundVehicle;
+          break;
+        }
+      }
       
       if (!vehicle) {
         return res.status(404).json({ message: "No vehicle assigned" });
@@ -314,9 +326,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Find vehicle where user is driver
-      const vehicles = await storage.getVehiclesByOwnerId(1); // Get all vehicles for now
-      const vehicle = Array.from(vehicles).find(v => v.driverId === userId);
+      // Find vehicle where user is driver - check all owners
+      const allUsers = await storage.getAllUsers();
+      const owners = allUsers.filter(u => u.role === "owner");
+      let vehicle = null;
+
+      for (const owner of owners) {
+        const ownerVehicles = await storage.getVehiclesByOwnerId(owner.id);
+        const foundVehicle = ownerVehicles.find(v => v.driverId === userId);
+        if (foundVehicle) {
+          vehicle = foundVehicle;
+          break;
+        }
+      }
       
       if (!vehicle) {
         return res.status(404).json({ message: "No vehicle assigned" });
