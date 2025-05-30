@@ -1,0 +1,75 @@
+Replit Prompt: TrotroPay Mobile Application (MVP)
+Alright, this is exciting! We've meticulously outlined the pain points and envisioned a powerful solution. Now, let's craft a comprehensive prompt for Replit to kickstart the development of our TrotroPay MVP (Minimum Viable Product).
+
+This prompt aims to provide enough detail for a developer to understand the core functionality, user flows, and key features for each user type. We'll focus on the essential elements for a functional first version, knowing that more advanced features can be added later.
+
+Project Title: TrotroPay - Digitalizing Ghanaian Trotro Payments
+Project Goal:
+Develop a mobile application (MVP) that facilitates cashless payments for trotro fares in Ghana, primarily leveraging Mobile Money (MoMo). The app aims to solve common pain points related to cash handling, such as change disputes, security risks, and lack of transparency for passengers, mates, drivers, and car owners.
+
+Core User Roles:
+Passenger
+Mate (Trotro Conductor)
+Driver
+Car Owner
+Key Features & User Flows (MVP Focus):
+1. Passenger App Features:
+User Onboarding: Simple signup/login using phone number (MoMo registered if possible).
+Home Screen:
+Prominent "Scan & Pay" button (for QR code).
+Option to manually enter Trotro ID (a unique ID displayed in the trotro).
+Payment Flow:
+Scan QR code OR enter Trotro ID.
+App displays the vehicle's current route.
+Select Destination: Passenger selects their alighting point from a list of common stops for that route.
+Fare Display: The exact fare for the selected destination is clearly displayed.
+Payment Confirmation: Confirmation screen showing amount and recipient (TrotroPay system).
+MoMo Integration: Initiate payment via the user's MoMo wallet (using relevant MoMo API calls or USSD prompts for payment authorization).
+Payment Success/Failure Feedback: Clear visual and audio confirmation.
+Transaction History: List of past journeys with date, time, trotro ID, route, destination, and amount paid.
+Basic Profile: View/edit personal details.
+2. Mate App Features:
+User Onboarding: Login using pre-registered credentials provided by the car owner/TrotroPay admin.
+Dashboard:
+Current Route Display: Ability to set and change the active route for the trotro.
+QR Code Display: A persistent, scannable QR code unique to the trotro/mate for passengers to scan.
+Incoming Payments Feed: Real-time list of successful payments received, showing passenger phone number (masked), amount, and time.
+"Set Destination Fare" (Manual Override/Confirmation): Option to confirm/adjust fare if a passenger is paying cash (for transition period) or if there's a unique fare situation.
+Daily Summary: View total collected amount for the current shift/day.
+Transaction Log: Detailed list of all received payments.
+Notifications: Audible alert for new incoming payments.
+3. Driver App Features:
+User Onboarding: Login using pre-registered credentials linked to a specific vehicle.
+Dashboard:
+Real-time Earnings View: Display of gross earnings for their specific vehicle during the current shift/day.
+Mate Performance: View current mate assigned and their collected amount for the shift.
+Route Information: Current route being plied.
+Daily/Shift Summary: Breakdown of earnings (gross, potential mate commission, net owner payout).
+Vehicle Association: Clear indication of the vehicle they are currently driving.
+4. Car Owner App Features:
+User Onboarding: Login using pre-registered credentials.
+Dashboard:
+Overall Earnings Overview: Aggregated view of income across all owned vehicles (if multiple).
+Individual Vehicle Performance: Card/summary for each owned vehicle showing its current status and daily/weekly earnings.
+Net Payouts: Clear display of net funds transferred to their MoMo/bank account after commissions.
+Vehicle Management:
+List of registered vehicles.
+Assign/de-assign mates and drivers to specific vehicles.
+Set/edit commission structures (e.g., percentage or fixed amount) for mates and drivers.
+Transaction History (Detailed): Comprehensive log of all payments received by their vehicles, accessible by date range, vehicle, driver, or mate.
+Automated Payout Settings: Configure how often earnings are disbursed to their MoMo/bank account.
+Technical Considerations & Assumptions:
+Mobile Money (MoMo) API Integration: Crucial for payment processing. Assume access to relevant MoMo APIs (e.g., MTN Mobile Money API, Vodafone Cash API, AirtelTigo Money API) or a payment gateway that aggregates them. This will require proper API keys and authentication.
+Backend Database: To store user data, vehicle details, transaction logs, route information, fare data, and commission structures.
+Real-time Updates: Utilize technologies (e.g., WebSockets or efficient polling) for real-time payment notifications and dashboard updates.
+Security: Implement robust security measures for data encryption, user authentication, and transaction integrity.
+Scalability: Design with future growth in mind.
+Platform: Suggest cross-platform development (e.g., React Native, Flutter) for efficient deployment on both Android and iOS, or target Android first due to market prevalence in Ghana.
+Replit Environment Setup:
+The developer should consider setting up a basic Node.js/Python/Go (or preferred backend language) backend to handle API calls, database interactions, and business logic, alongside a frontend framework (e.g., React Native, Flutter, or a simplified web app with a mobile-first design) for the user interfaces.
+
+Deliverables for MVP:
+Functional mobile application prototypes/components for each user role, demonstrating the core payment flow.
+A backend structure capable of handling user authentication, transaction recording, and basic data retrieval.
+Clear documentation on how to run and test the application.
+This prompt sets a strong foundation for the development. Good luck with the coding, and let's get TrotroPay off the ground!
