@@ -1,0 +1,400 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
+import { storage } from "./storage";
+import { insertTransactionSchema } from "@shared/schema";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  phone: z.string().min(10),
+  pin: z.string().min(4),
+});
+
+const paymentSchema = z.object({
+  vehicleId: z.string(),
+  destination: z.string(),
+  amount: z.string(),
+});
+
+// Store active WebSocket connections by user ID
+const activeConnections = new Map<number, WebSocket>();
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  const httpServer = createServer(app);
+
+  // WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  wss.on('connection', (ws, req) => {
+    console.log('WebSocket client connected');
+
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'authenticate' && data.userId) {
+          activeConnections.set(data.userId, ws);
+          console.log(`User ${data.userId} authenticated on WebSocket`);
+        }
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      // Remove connection from active connections
+      for (const [userId, connection] of activeConnections.entries()) {
+        if (connection === ws) {
+          activeConnections.delete(userId);
+          break;
+        }
+      }
+      console.log('WebSocket client disconnected');
+    });
+  });
+
+  // Broadcast to specific user
+  function broadcastToUser(userId: number, message: any) {
+    const connection = activeConnections.get(userId);
+    if (connection && connection.readyState === WebSocket.OPEN) {
+      connection.send(JSON.stringify(message));
+    }
+  }
+
+  // Broadcast to all vehicle crew (driver, mate, owner)
+  function broadcastToVehicleCrew(vehicleId: number, message: any) {
+    storage.getVehicle(vehicleId).then(vehicle => {
+      if (vehicle) {
+        if (vehicle.driverId) broadcastToUser(vehicle.driverId, message);
+        if (vehicle.mateId) broadcastToUser(vehicle.mateId, message);
+        if (vehicle.ownerId) broadcastToUser(vehicle.ownerId, message);
+      }
+    });
+  }
+
+  // Auth routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { phone, pin } = loginSchema.parse(req.body);
+      
+      const user = await storage.getUserByPhone(phone);
+      if (!user || user.pin !== pin) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      req.session.userId = user.id;
+      res.json({ user: { ...user, pin: undefined } });
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const user = await storage.getUser(req.session.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ user: { ...user, pin: undefined } });
+  });
+
+  // Vehicle routes
+  app.get("/api/vehicles/by-id/:vehicleId", async (req, res) => {
+    try {
+      const vehicle = await storage.getVehicleByVehicleId(req.params.vehicleId);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+      res.json(vehicle);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/vehicles/owner/:ownerId", async (req, res) => {
+    try {
+      const ownerId = parseInt(req.params.ownerId);
+      const vehicles = await storage.getVehiclesByOwnerId(ownerId);
+      res.json(vehicles);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Route routes
+  app.get("/api/routes", async (req, res) => {
+    try {
+      const routes = await storage.getAllRoutes();
+      res.json(routes);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/routes/:name", async (req, res) => {
+    try {
+      const route = await storage.getRouteByName(req.params.name);
+      if (!route) {
+        return res.status(404).json({ message: "Route not found" });
+      }
+      res.json(route);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Transaction routes
+  app.get("/api/transactions/user/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const transactions = await storage.getTransactionsByUserId(userId);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/transactions/vehicle/:vehicleId", async (req, res) => {
+    try {
+      const vehicleId = parseInt(req.params.vehicleId);
+      const transactions = await storage.getTransactionsByVehicleId(vehicleId);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/transactions/vehicle/:vehicleId/today", async (req, res) => {
+    try {
+      const vehicleId = parseInt(req.params.vehicleId);
+      const transactions = await storage.getTodaysTransactionsByVehicleId(vehicleId);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Payment processing
+  app.post("/api/payments/process", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { vehicleId, destination, amount } = paymentSchema.parse(req.body);
+      
+      // Get passenger
+      const passenger = await storage.getUser(req.session.userId);
+      if (!passenger) {
+        return res.status(404).json({ message: "Passenger not found" });
+      }
+
+      // Get vehicle
+      const vehicle = await storage.getVehicleByVehicleId(vehicleId);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+
+      // Check if passenger has sufficient balance
+      const currentBalance = parseFloat(passenger.momoBalance);
+      const paymentAmount = parseFloat(amount);
+
+      if (currentBalance < paymentAmount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Create transaction
+      const transaction = await storage.createTransaction({
+        passengerId: passenger.id,
+        vehicleId: vehicle.id,
+        mateId: vehicle.mateId || 0,
+        driverId: vehicle.driverId || 0,
+        ownerId: vehicle.ownerId || 0,
+        amount,
+        destination,
+        route: vehicle.route,
+        status: "completed",
+        paymentMethod: "momo",
+      });
+
+      // Update passenger balance
+      const newBalance = (currentBalance - paymentAmount).toFixed(2);
+      await storage.updateUserBalance(passenger.id, newBalance);
+
+      // Broadcast payment notification to vehicle crew
+      const paymentNotification = {
+        type: "payment_received",
+        transaction: {
+          ...transaction,
+          passengerPhone: passenger.phone.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2'),
+        },
+      };
+
+      broadcastToVehicleCrew(vehicle.id, paymentNotification);
+
+      res.json({ 
+        message: "Payment successful",
+        transaction,
+        newBalance 
+      });
+    } catch (error) {
+      console.error("Payment error:", error);
+      res.status(500).json({ message: "Payment failed" });
+    }
+  });
+
+  // Dashboard data endpoints
+  app.get("/api/dashboard/passenger/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      const transactions = await storage.getTransactionsByUserId(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        user: { ...user, pin: undefined },
+        recentTransactions: transactions.slice(-5).reverse(),
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/dashboard/mate/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Find vehicle where user is mate
+      const vehicles = await storage.getVehiclesByOwnerId(1); // Get all vehicles for now
+      const vehicle = Array.from(vehicles).find(v => v.mateId === userId);
+      
+      if (!vehicle) {
+        return res.status(404).json({ message: "No vehicle assigned" });
+      }
+
+      const todayTransactions = await storage.getTodaysTransactionsByVehicleId(vehicle.id);
+      const totalEarnings = todayTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      res.json({
+        user: { ...user, pin: undefined },
+        vehicle,
+        todayEarnings: totalEarnings.toFixed(2),
+        passengerCount: todayTransactions.length,
+        recentPayments: todayTransactions.slice(-10).reverse(),
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/dashboard/driver/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Find vehicle where user is driver
+      const vehicles = await storage.getVehiclesByOwnerId(1); // Get all vehicles for now
+      const vehicle = Array.from(vehicles).find(v => v.driverId === userId);
+      
+      if (!vehicle) {
+        return res.status(404).json({ message: "No vehicle assigned" });
+      }
+
+      const todayTransactions = await storage.getTodaysTransactionsByVehicleId(vehicle.id);
+      const grossEarnings = todayTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const driverShare = grossEarnings * 0.15; // 15% commission
+
+      // Get mate info
+      const mate = vehicle.mateId ? await storage.getUser(vehicle.mateId) : null;
+
+      res.json({
+        user: { ...user, pin: undefined },
+        vehicle,
+        grossEarnings: grossEarnings.toFixed(2),
+        driverShare: driverShare.toFixed(2),
+        mate: mate ? { ...mate, pin: undefined } : null,
+        todayTransactions: todayTransactions.length,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/dashboard/owner/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const vehicles = await storage.getVehiclesByOwnerId(userId);
+      const commission = await storage.getCommissionByOwnerId(userId);
+
+      // Calculate earnings for each vehicle
+      const vehicleData = await Promise.all(
+        vehicles.map(async (vehicle) => {
+          const todayTransactions = await storage.getTodaysTransactionsByVehicleId(vehicle.id);
+          const grossEarnings = todayTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+          
+          const driverCommission = grossEarnings * 0.15;
+          const mateCommission = grossEarnings * 0.10;
+          const platformFee = grossEarnings * 0.05;
+          const netEarnings = grossEarnings - driverCommission - mateCommission - platformFee;
+
+          // Get driver and mate names
+          const driver = vehicle.driverId ? await storage.getUser(vehicle.driverId) : null;
+          const mate = vehicle.mateId ? await storage.getUser(vehicle.mateId) : null;
+
+          return {
+            ...vehicle,
+            grossEarnings: grossEarnings.toFixed(2),
+            netEarnings: netEarnings.toFixed(2),
+            commissions: (driverCommission + mateCommission + platformFee).toFixed(2),
+            driverName: driver?.name || "Unassigned",
+            mateName: mate?.name || "Unassigned",
+            todayTransactions: todayTransactions.length,
+          };
+        })
+      );
+
+      const totalGross = vehicleData.reduce((sum, v) => sum + parseFloat(v.grossEarnings), 0);
+      const totalNet = vehicleData.reduce((sum, v) => sum + parseFloat(v.netEarnings), 0);
+
+      res.json({
+        user: { ...user, pin: undefined },
+        vehicles: vehicleData,
+        totalEarnings: totalGross.toFixed(2),
+        netProfit: totalNet.toFixed(2),
+        commission,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  return httpServer;
+}

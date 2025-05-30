@@ -1,0 +1,285 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Car, Wallet, CheckCircle, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+interface PaymentFlowProps {
+  vehicleId: string;
+  onBack: () => void;
+}
+
+export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
+  const [selectedDestination, setSelectedDestination] = useState("");
+  const [fareAmount, setFareAmount] = useState("0.00");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: vehicle, isLoading: vehicleLoading } = useQuery({
+    queryKey: [`/api/vehicles/by-id/${vehicleId}`],
+    enabled: !!vehicleId,
+  });
+
+  const { data: route } = useQuery({
+    queryKey: [`/api/routes/${vehicle?.route}`],
+    enabled: !!vehicle?.route,
+  });
+
+  const paymentMutation = useMutation({
+    mutationFn: async (paymentData: { vehicleId: string; destination: string; amount: string }) => {
+      const response = await apiRequest("POST", "/api/payments/process", paymentData);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setShowSuccess(true);
+      // Update user balance in auth context
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/dashboard/passenger/${user?.id}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Unable to process payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Calculate fare based on selected destination
+  useEffect(() => {
+    if (route && selectedDestination) {
+      const fareMap = route.fares.reduce((acc: Record<string, string>, fare: string) => {
+        const [stop, amount] = fare.split(':');
+        acc[stop] = amount;
+        return acc;
+      }, {});
+      
+      const amount = fareMap[selectedDestination] || "0.00";
+      setFareAmount(amount);
+    }
+  }, [route, selectedDestination]);
+
+  const handlePayment = () => {
+    if (!selectedDestination) {
+      toast({
+        title: "Error",
+        description: "Please select your destination",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (parseFloat(fareAmount) <= 0) {
+      toast({
+        title: "Error",
+        description: "Invalid fare amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    paymentMutation.mutate({
+      vehicleId,
+      destination: selectedDestination,
+      amount: fareAmount,
+    });
+  };
+
+  const formatAmount = (amount: string) => `GH₵ ${parseFloat(amount).toFixed(2)}`;
+
+  const handleSuccessClose = () => {
+    setShowSuccess(false);
+    onBack();
+  };
+
+  if (vehicleLoading) {
+    return (
+      <div className="mobile-container">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Loading vehicle information...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!vehicle) {
+    return (
+      <div className="mobile-container">
+        <div className="p-4">
+          <div className="flex items-center mb-4">
+            <Button variant="ghost" size="icon" onClick={onBack}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h2 className="font-medium ml-3">Payment</h2>
+          </div>
+          <Card className="border-destructive">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+              <h3 className="font-medium text-foreground mb-2">Vehicle Not Found</h3>
+              <p className="text-muted-foreground">
+                The trotro ID "{vehicleId}" was not found in our system.
+              </p>
+              <Button onClick={onBack} className="mt-4">
+                Go Back
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mobile-container">
+      {/* Header */}
+      <div className="bg-primary text-white p-4">
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" className="text-white mr-3" onClick={onBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h2 className="font-medium">Complete Payment</h2>
+        </div>
+      </div>
+
+      <div className="p-4">
+        {/* Vehicle Info */}
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <Car className="h-6 w-6 text-primary mr-3" />
+              <div>
+                <p className="font-medium text-foreground">{vehicle.vehicleId}</p>
+                <p className="text-sm text-muted-foreground">{vehicle.route}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Destination Selection */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Select Your Destination
+          </label>
+          <Select value={selectedDestination} onValueChange={setSelectedDestination}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose destination..." />
+            </SelectTrigger>
+            <SelectContent>
+              {route?.stops.map((stop: string) => {
+                const fareMap = route.fares.reduce((acc: Record<string, string>, fare: string) => {
+                  const [stopName, amount] = fare.split(':');
+                  acc[stopName] = amount;
+                  return acc;
+                }, {});
+                
+                const stopFare = fareMap[stop];
+                if (!stopFare || parseFloat(stopFare) === 0) return null;
+                
+                return (
+                  <SelectItem key={stop} value={stop}>
+                    {stop} - {formatAmount(stopFare)}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Fare Display */}
+        {selectedDestination && (
+          <Card className="bg-green-50 border-success mb-6">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center">
+                <span className="text-foreground">Fare Amount</span>
+                <span className="text-2xl font-bold text-success">
+                  {formatAmount(fareAmount)}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Payment Method */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Payment Method
+          </label>
+          <Card>
+            <CardContent className="p-3">
+              <div className="flex items-center space-x-3">
+                <Wallet className="h-6 w-6 text-accent" />
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">MTN Mobile Money</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.phone?.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2')}
+                  </p>
+                </div>
+                <span className="text-accent font-medium">
+                  {formatAmount(user?.momoBalance || "0")}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Pay Button */}
+        <Button 
+          onClick={handlePayment}
+          className="w-full py-4 text-lg"
+          disabled={!selectedDestination || paymentMutation.isPending}
+        >
+          {paymentMutation.isPending 
+            ? "Processing..." 
+            : `Pay ${formatAmount(fareAmount)}`
+          }
+        </Button>
+
+        {/* Balance Warning */}
+        {user && parseFloat(user.momoBalance) < parseFloat(fareAmount) && (
+          <Card className="mt-4 border-warning">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="h-5 w-5 text-warning" />
+                <p className="text-sm text-warning">
+                  Insufficient balance. Please top up your MoMo account.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Success Modal */}
+      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <DialogContent className="w-full max-w-sm mx-4">
+          <div className="text-center py-6">
+            <div className="w-16 h-16 bg-success rounded-full mx-auto mb-4 flex items-center justify-center">
+              <CheckCircle className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">
+              Payment Successful!
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Your fare of <span className="font-medium text-success">
+                {formatAmount(fareAmount)}
+              </span> has been paid successfully to {vehicle.vehicleId}.
+            </p>
+            <Button onClick={handleSuccessClose} className="w-full">
+              Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
