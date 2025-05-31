@@ -10,6 +10,14 @@ import MateDashboard from "@/pages/mate-dashboard";
 import DriverDashboard from "@/pages/driver-dashboard";
 import OwnerDashboard from "@/pages/owner-dashboard";
 import PaymentFlow from "@/pages/payment-flow";
+import PassengerHistory from "@/pages/passenger-history";
+import PassengerProfile from "@/pages/passenger-profile";
+import TopUpPage from "@/pages/top-up";
+import NotificationsPage from "@/pages/notifications";
+import QRCodeDisplay from "@/pages/qr-code-display";
+import EarningsPage from "@/pages/earnings";
+import DriverPerformance from "@/pages/driver-performance";
+import SettingsPage from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
