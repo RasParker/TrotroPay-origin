@@ -69,7 +69,7 @@ export default function OwnerDashboard() {
         </div>
       </div>
 
-      <div className="p-4 pb-24">
+      <div className="p-4 pb-32">
         {/* Total Earnings Overview */}
         <Card className="bg-gradient-to-r from-purple-600 to-purple-800 text-white mb-6">
           <CardContent className="p-4">
@@ -87,7 +87,7 @@ export default function OwnerDashboard() {
         {/* Vehicle Performance Cards */}
         <div className="space-y-4 mb-6">
           <h3 className="text-lg font-medium text-foreground">Vehicle Performance</h3>
-          
+
           {dashboardData?.vehicles?.length > 0 ? (
             dashboardData.vehicles.map((vehicle: any) => (
               <Card key={vehicle.id} className="border border-border">
@@ -105,7 +105,7 @@ export default function OwnerDashboard() {
                       Active
                     </Badge>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-3 text-center mb-3">
                     <div>
                       <p className="text-lg font-bold text-foreground">

@@ -106,7 +106,7 @@ export default function PassengerDashboard() {
         </div>
       </div>
 
-      <div className="p-4 pb-24">
+      <div className="p-4 pb-32">
         {/* Balance Card */}
         <Card className="gradient-accent text-white mb-6">
           <CardContent className="p-4">

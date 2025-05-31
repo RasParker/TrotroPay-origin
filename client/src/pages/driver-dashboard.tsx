@@ -76,7 +76,7 @@ export default function DriverDashboard() {
         </div>
       </div>
 
-      <div className="p-4 pb-24">
+      <div className="p-4 pb-32">
         {/* Vehicle Info */}
         {dashboardData?.vehicle && (
           <Card className="gradient-accent text-white mb-4">
