@@ -69,7 +69,7 @@ export default function OwnerDashboard() {
         </div>
       </div>
 
-      <div className="p-4 pb-32">
+      <div className="p-4 pb-24">
         {/* Total Earnings Overview */}
         <Card className="bg-gradient-to-r from-purple-600 to-purple-800 text-white mb-6">
           <CardContent className="p-4">
