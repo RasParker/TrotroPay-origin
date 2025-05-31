@@ -92,7 +92,7 @@ export default function MateDashboard() {
         </div>
       </div>
 
-      <div className="p-4 pb-24">
+      <div className="p-4 pb-32">
         {/* Vehicle Info */}
         {dashboardData?.vehicle && (
           <Card className="gradient-primary text-white mb-4">
