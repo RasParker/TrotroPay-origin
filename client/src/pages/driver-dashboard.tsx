@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Car, 
   TrendingUp, 
@@ -14,15 +16,56 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function DriverDashboard() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showRouteDialog, setShowRouteDialog] = useState(false);
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/driver/${user?.id}`],
     enabled: !!user?.id,
+  });
+
+  // Fetch available routes
+  const { data: routes } = useQuery({
+    queryKey: ['/api/routes'],
+    enabled: showRouteDialog,
+  });
+
+  // Route change mutation
+  const routeChangeMutation = useMutation({
+    mutationFn: async ({ vehicleId, routeId }: { vehicleId: string; routeId: number }) => {
+      const response = await fetch(`/api/vehicles/${vehicleId}/route`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ routeId }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update route');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/dashboard/driver/${user?.id}`] });
+      setShowRouteDialog(false);
+      toast({
+        title: "Route Updated",
+        description: `Successfully changed to ${data.route.name}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Route Change Failed",
+        description: error.message || "Failed to update route",
+        variant: "destructive",
+      });
+    },
   });
 
   const formatAmount = (amount: string | number) => {
@@ -136,12 +179,7 @@ export default function DriverDashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => {
-                  toast({
-                    title: "Route Change Request",
-                    description: "Contact your supervisor or owner to change your assigned route",
-                  });
-                }}
+                onClick={() => setShowRouteDialog(true)}
               >
                 Change Route
               </Button>

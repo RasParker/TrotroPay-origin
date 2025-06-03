@@ -276,6 +276,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all available routes
+  app.get("/api/routes", async (req, res) => {
+    try {
+      const routes = await storage.getAllRoutes();
+      res.json(routes);
+    } catch (error) {
+      console.error("Error fetching routes:", error);
+      res.status(500).json({ error: "Failed to fetch routes" });
+    }
+  });
+
+  // Update vehicle route (for drivers)
+  app.put("/api/vehicles/:vehicleId/route", async (req, res) => {
+    try {
+      const { vehicleId } = req.params;
+      const { routeId } = req.body;
+
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.role !== "driver") {
+        return res.status(403).json({ message: "Only drivers can change routes" });
+      }
+
+      // Get the vehicle
+      const vehicle = await storage.getVehicleByVehicleId(vehicleId);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+
+      // Verify the driver is assigned to this vehicle
+      if (vehicle.driverId !== user.id) {
+        return res.status(403).json({ message: "You are not assigned to this vehicle" });
+      }
+
+      // Get the route details
+      const route = await storage.getRoute(parseInt(routeId));
+      if (!route) {
+        return res.status(404).json({ message: "Route not found" });
+      }
+
+      // Update the vehicle's route
+      const updatedVehicle = await storage.updateVehicle(vehicle.id, {
+        route: route.name
+      });
+
+      res.json({
+        message: "Route updated successfully",
+        vehicle: updatedVehicle,
+        route: route
+      });
+    } catch (error) {
+      console.error("Error updating vehicle route:", error);
+      res.status(500).json({ error: "Failed to update route" });
+    }
+  });
+
   // Generate QR code for vehicle
   app.get("/api/qr-code/:vehicleId", async (req, res) => {
     try {
