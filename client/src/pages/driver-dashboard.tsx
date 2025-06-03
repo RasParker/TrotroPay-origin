@@ -56,9 +56,10 @@ export default function DriverDashboard() {
       queryClient.invalidateQueries({ queryKey: [`/api/dashboard/driver/${user?.id}`] });
       setShowRouteDialog(false);
       setSelectedRoute(null);
+      const isInitialSelection = !dashboardData?.vehicle?.route;
       toast({
-        title: "Route Updated",
-        description: `Successfully changed to ${data.route.name}`,
+        title: isInitialSelection ? "Route Selected" : "Route Updated",
+        description: `Successfully ${isInitialSelection ? 'selected' : 'changed to'} ${data.route.name}`,
       });
     },
     onError: (error: any) => {
@@ -183,7 +184,7 @@ export default function DriverDashboard() {
                 size="sm"
                 onClick={() => setShowRouteDialog(true)}
               >
-                Change Route
+                {dashboardData?.vehicle?.route ? "Change Route" : "Select Route"}
               </Button>
             </div>
           </CardContent>
@@ -288,11 +289,16 @@ export default function DriverDashboard() {
       <Dialog open={showRouteDialog} onOpenChange={setShowRouteDialog}>
         <DialogContent className="!w-[80vw] !max-w-xs !mx-auto !p-4 sm:!max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-lg">Change Route</DialogTitle>
+            <DialogTitle className="text-lg">
+              {dashboardData?.vehicle?.route ? "Change Route" : "Select Route"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Select a new route for your vehicle. This will update your assigned route immediately.
+              {dashboardData?.vehicle?.route 
+                ? "Select a new route for your vehicle. This will update your assigned route immediately."
+                : "Choose your operating route. This will set your vehicle's route for today."
+              }
             </p>
             
             <div className="space-y-2">

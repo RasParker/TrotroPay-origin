@@ -288,6 +288,31 @@ export class MemStorage implements IStorage {
     };
     this.vehicles.set(vehicle2.id, vehicle2);
 
+    // Create a driver without initial route assignment for testing
+    const newDriver: User = {
+      id: this.currentId++,
+      phone: "0244567890",
+      pin: "1234",
+      role: "driver",
+      name: "Samuel Tetteh",
+      momoBalance: "0.00",
+      createdAt: new Date(),
+    };
+    this.users.set(newDriver.id, newDriver);
+
+    // Vehicle without route for initial selection testing
+    const vehicleNoRoute: Vehicle = {
+      id: this.currentId++,
+      vehicleId: "GT-9999-21",
+      route: null,
+      ownerId: owner.id,
+      driverId: newDriver.id,
+      mateId: null,
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.vehicles.set(vehicleNoRoute.id, vehicleNoRoute);
+
     // Create test commission
     const commission: Commission = {
       id: this.currentId++,

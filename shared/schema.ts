@@ -15,7 +15,7 @@ export const users = pgTable("users", {
 export const vehicles = pgTable("vehicles", {
   id: serial("id").primaryKey(),
   vehicleId: text("vehicle_id").notNull().unique(), // e.g., GT-1234-20
-  route: text("route").notNull(),
+  route: text("route"), // Allow null for drivers without initially assigned routes
   ownerId: integer("owner_id").references(() => users.id),
   driverId: integer("driver_id").references(() => users.id),
   mateId: integer("mate_id").references(() => users.id),
