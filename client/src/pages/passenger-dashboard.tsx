@@ -19,7 +19,7 @@ export default function PassengerDashboard() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/passenger/${user?.id}`],
@@ -172,8 +172,9 @@ export default function PassengerDashboard() {
               e.preventDefault();
               e.stopPropagation();
               console.log("Group payment button clicked");
-              alert("Button clicked! Navigating to payment...");
+              console.log("Current location:", location);
               setLocation("#payment/GT-1234-20");
+              console.log("New location set to:", "#payment/GT-1234-20");
             }}
             className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700 rounded-md cursor-pointer active:scale-95 transition-transform"
             style={{ touchAction: 'manipulation' }}
