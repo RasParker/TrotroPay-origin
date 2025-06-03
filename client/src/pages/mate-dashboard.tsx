@@ -216,7 +216,7 @@ export default function MateDashboard() {
         )}
 
         {/* Today's Performance */}
-        <div className="grid grid-cols-2 gap-4 mb-6"></div>
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <Card className="gradient-secondary text-white">
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-6 w-6 mx-auto mb-2" />
