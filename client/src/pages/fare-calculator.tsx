@@ -45,7 +45,7 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
     },
   });
 
-  const selectedRouteData = routes?.find((r: any) => r.id === parseInt(selectedRoute));
+  const selectedRouteData = routes ? routes.find((r: any) => r.id === parseInt(selectedRoute)) : null;
   
   // Get valid alighting stops based on boarding stop
   const getValidAlightingStops = () => {
@@ -110,7 +110,7 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
                   <SelectValue placeholder="Choose a route" />
                 </SelectTrigger>
                 <SelectContent>
-                  {routes?.map((route: any) => (
+                  {routes && routes.map((route: any) => (
                     <SelectItem key={route.id} value={route.id.toString()}>
                       {route.name}
                     </SelectItem>

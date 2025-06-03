@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Edit3, Plus, History, User, Home, Bell, LogOut, Users } from "lucide-react";
+import { QrCode, Edit3, Plus, History, User, Home, Bell, LogOut, Users, Calculator } from "lucide-react";
 import { QRScanner } from "@/components/ui/qr-scanner";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -295,6 +295,16 @@ export default function PassengerDashboard() {
             <div className="text-center">
               <Home className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Home</span>
+            </div>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/fare-calculator")}
+          >
+            <div className="text-center">
+              <Calculator className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">Fare Calc</span>
             </div>
           </Button>
           <Button 
