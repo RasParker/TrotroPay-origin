@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Edit3, Plus, History, User, Home, Bell, LogOut } from "lucide-react";
+import { QrCode, Edit3, Plus, History, User, Home, Bell, LogOut, Users } from "lucide-react";
 import { QRScanner } from "@/components/ui/qr-scanner";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,10 @@ export default function PassengerDashboard() {
     queryKey: [`/api/dashboard/passenger/${user?.id}`],
     enabled: !!user?.id,
   });
+
+  // Safely extract data with fallbacks
+  const userData = (dashboardData as any)?.user || user;
+  const recentTransactions = (dashboardData as any)?.recentTransactions || [];
 
   const handleQRScan = (vehicleId: string) => {
     setShowQRScanner(false);
@@ -70,13 +74,13 @@ export default function PassengerDashboard() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="mobile-container">
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p>Loading...</p>
+            <p>Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -89,7 +93,7 @@ export default function PassengerDashboard() {
       <div className="gradient-primary text-white p-4">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="font-medium">Hello, {dashboardData?.user?.name || "Passenger"}</h2>
+            <h2 className="font-medium">Hello, {userData?.name || "Passenger"}</h2>
             <p className="text-green-200 text-sm">Ready for your journey?</p>
           </div>
           <div className="flex items-center space-x-3">
@@ -121,7 +125,7 @@ export default function PassengerDashboard() {
               <div>
                 <p className="text-blue-100 text-sm">Wallet Balance</p>
                 <p className="text-2xl font-bold">
-                  {formatAmount(dashboardData?.user?.momoBalance || "0")}
+                  {formatAmount(userData?.momoBalance || "0")}
                 </p>
               </div>
               <Button 
@@ -194,8 +198,8 @@ export default function PassengerDashboard() {
           </div>
 
           <div className="space-y-3">
-            {dashboardData?.recentTransactions?.length > 0 ? (
-              dashboardData.recentTransactions.map((transaction: any) => (
+            {recentTransactions.length > 0 ? (
+              recentTransactions.map((transaction: any) => (
                 <Card key={transaction.id} className="border border-border">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
