@@ -133,7 +133,16 @@ export default function DriverDashboard() {
                   {dashboardData?.vehicle?.route || "No route assigned"}
                 </p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  toast({
+                    title: "Route Change Request",
+                    description: "Contact your supervisor or owner to change your assigned route",
+                  });
+                }}
+              >
                 Change Route
               </Button>
             </div>
@@ -212,13 +221,21 @@ export default function DriverDashboard() {
               <span className="text-xs">Dashboard</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/performance")}
+          >
             <div className="text-center">
               <BarChart3 className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Performance</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/settings")}
+          >
             <div className="text-center">
               <Settings className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Settings</span>
