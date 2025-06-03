@@ -75,26 +75,22 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
         <Card className="mb-6">
           <CardContent className="p-8 text-center">
             <div className="w-64 h-64 bg-white border-2 border-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center shadow-lg">
-              {/* Enhanced QR Code Design */}
-              <div className="relative w-56 h-56">
-                <div className="absolute inset-0 bg-black rounded-lg">
-                  {/* QR pattern simulation */}
-                  <div className="grid grid-cols-8 gap-1 p-2 h-full">
-                    {Array.from({ length: 64 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`${
-                          Math.random() > 0.5 ? 'bg-black' : 'bg-white'
-                        } rounded-sm`}
-                      />
-                    ))}
-                  </div>
-                  {/* Center logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                    <QrCode className="h-6 w-6 text-success" />
-                  </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-success"></div>
                 </div>
-              </div>
+              ) : qrData?.qrCodeUrl ? (
+                <img 
+                  src={qrData.qrCodeUrl} 
+                  alt="Payment QR Code"
+                  className="w-full h-full object-contain p-4"
+                />
+              ) : (
+                <div className="text-gray-500 text-center">
+                  <QrCode className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm">QR Code Unavailable</p>
+                </div>
+              )}
             </div>
             
             <h3 className="text-lg font-medium text-foreground mb-2">
@@ -106,8 +102,19 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
             
             <div className="bg-muted p-3 rounded-lg mb-4">
               <p className="text-sm font-medium text-foreground">Vehicle ID</p>
-              <p className="text-lg font-bold text-primary">GT-1234-20</p>
+              <p className="text-lg font-bold text-primary">{vehicleId || "Loading..."}</p>
             </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="mb-4"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh QR Code
+            </Button>
           </CardContent>
         </Card>
 
