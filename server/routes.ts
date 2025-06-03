@@ -114,13 +114,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { phone, pin } = loginSchema.parse(req.body);
       
       const user = await storage.getUserByPhone(phone);
-      if (!user || user.pin !== pin) {
-        return res.status(401).json({ message: "Invalid credentials" });
+      if (!user) {
+        return res.status(401).json({ message: "Invalid phone number or PIN" });
+      }
+      
+      if (user.pin !== pin) {
+        return res.status(401).json({ message: "Invalid phone number or PIN" });
       }
 
       req.session.userId = user.id;
       res.json({ user: { ...user, pin: undefined } });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(400).json({ message: "Invalid request data" });
     }
   });

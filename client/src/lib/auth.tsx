@@ -34,6 +34,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loginMutation = useMutation({
     mutationFn: async ({ phone, pin }: { phone: string; pin: string }) => {
       const response = await apiRequest("POST", "/api/auth/login", { phone, pin });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
       return response.json();
     },
     onSuccess: (data) => {
