@@ -289,34 +289,34 @@ export default function PassengerDashboard() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-border bottom-nav-safe">
-        <div className="flex">
-          <Button variant="ghost" className="flex-1 py-3 text-primary">
-            <div className="text-center">
-              <Home className="h-5 w-5 mx-auto mb-1" />
-              <span className="text-xs">Home</span>
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg bottom-nav-safe">
+        <div className="flex justify-around items-center px-4 py-2">
+          <button className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 min-w-[60px]">
+            <div className="bg-blue-500 p-2 rounded-full mb-1">
+              <Home className="h-4 w-4 text-white" />
             </div>
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            <span className="text-xs font-medium text-blue-600">Home</span>
+          </button>
+          
+          <button 
             onClick={() => setLocation("/history")}
+            className="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-50 min-w-[60px] transition-colors"
           >
-            <div className="text-center">
-              <History className="h-5 w-5 mx-auto mb-1" />
-              <span className="text-xs">History</span>
+            <div className="bg-gray-100 p-2 rounded-full mb-1">
+              <History className="h-4 w-4 text-gray-600" />
             </div>
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            <span className="text-xs font-medium text-gray-600">History</span>
+          </button>
+          
+          <button 
             onClick={() => setLocation("/profile")}
+            className="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-50 min-w-[60px] transition-colors"
           >
-            <div className="text-center">
-              <User className="h-5 w-5 mx-auto mb-1" />
-              <span className="text-xs">Profile</span>
+            <div className="bg-gray-100 p-2 rounded-full mb-1">
+              <User className="h-4 w-4 text-gray-600" />
             </div>
-          </Button>
+            <span className="text-xs font-medium text-gray-600">Profile</span>
+          </button>
         </div>
       </div>
 
