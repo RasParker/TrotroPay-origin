@@ -104,33 +104,35 @@ export default function AuthPage() {
           <p className="text-muted-foreground">Digital payments for Ghana's trotros</p>
         </div>
 
-        {/* Role Selection */}
-        <div className="space-y-3 mb-8">
-          <h2 className="text-lg font-medium text-center mb-4">Choose Your Role</h2>
-          {roles.map((role) => {
-            const Icon = role.icon;
-            return (
-              <Card 
-                key={role.id}
-                className={`cursor-pointer transition-all border-2 ${
-                  selectedRole === role.id 
-                    ? "border-primary bg-primary/5" 
-                    : "border-border hover:border-primary/50"
-                }`}
-                onClick={() => handleMockLogin(role.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`h-6 w-6 ${role.color}`} />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-foreground">{role.title}</h3>
-                      <p className="text-sm text-muted-foreground">{role.description}</p>
+        {/* Role Selection - 2x2 Grid */}
+        <div className="mb-8">
+          <h2 className="text-lg font-medium text-center mb-2">Welcome Back</h2>
+          <p className="text-sm text-muted-foreground text-center mb-6">Choose your role and sign in to continue</p>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {roles.map((role) => {
+              const Icon = role.icon;
+              return (
+                <Card 
+                  key={role.id}
+                  className={`cursor-pointer transition-all border-2 ${
+                    selectedRole === role.id 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  onClick={() => handleMockLogin(role.id)}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className={`inline-flex p-3 rounded-lg bg-background/50 mb-3 ${role.color}`}>
+                      <Icon className="h-6 w-6" />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    <h3 className="font-medium text-sm mb-1">{role.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-tight">{role.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
         {/* Login Form */}
