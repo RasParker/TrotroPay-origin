@@ -167,20 +167,23 @@ export default function PassengerDashboard() {
 
         {/* Group Payment Demo */}
         <div className="mb-6">
-          <Button
-            onClick={() => {
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               console.log("Group payment button clicked");
+              alert("Button clicked! Navigating to payment...");
               setLocation("#payment/GT-1234-20");
-              console.log("Location set to:", "#payment/GT-1234-20");
             }}
-            className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700"
+            className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700 rounded-md cursor-pointer active:scale-95 transition-transform"
+            style={{ touchAction: 'manipulation' }}
           >
-            <div className="text-center">
+            <div className="text-center pointer-events-none">
               <Users className="h-6 w-6 mx-auto mb-1" />
-              <span className="font-medium">Try Group Payment</span>
+              <span className="font-medium block">Try Group Payment</span>
               <p className="text-xs opacity-90">Pay for multiple passengers</p>
             </div>
-          </Button>
+          </button>
         </div>
 
         {/* Recent Trips */}
