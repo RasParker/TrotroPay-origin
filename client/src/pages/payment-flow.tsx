@@ -17,6 +17,8 @@ interface PaymentFlowProps {
 export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const [selectedDestination, setSelectedDestination] = useState("");
   const [fareAmount, setFareAmount] = useState("0.00");
+  const [passengerCount, setPassengerCount] = useState(1);
+  const [totalAmount, setTotalAmount] = useState("0.00");
   const [showSuccess, setShowSuccess] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -33,7 +35,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   });
 
   const paymentMutation = useMutation({
-    mutationFn: async (paymentData: { vehicleId: string; destination: string; amount: string }) => {
+    mutationFn: async (paymentData: { vehicleId: string; destination: string; amount: string; passengerCount?: number }) => {
       const response = await apiRequest("POST", "/api/payments/process", paymentData);
       return response.json();
     },
@@ -52,7 +54,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
     },
   });
 
-  // Calculate fare based on selected destination
+  // Calculate fare based on selected destination and passenger count
   useEffect(() => {
     if (route && selectedDestination) {
       const fareMap = route.fares.reduce((acc: Record<string, string>, fare: string) => {
@@ -63,8 +65,13 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
       
       const amount = fareMap[selectedDestination] || "0.00";
       setFareAmount(amount);
+      
+      // Calculate total amount for group
+      const singleFare = parseFloat(amount);
+      const total = (singleFare * passengerCount).toFixed(2);
+      setTotalAmount(total);
     }
-  }, [route, selectedDestination]);
+  }, [route, selectedDestination, passengerCount]);
 
   const handlePayment = () => {
     if (!selectedDestination) {
@@ -76,7 +83,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
       return;
     }
 
-    if (parseFloat(fareAmount) <= 0) {
+    if (parseFloat(totalAmount) <= 0) {
       toast({
         title: "Error",
         description: "Invalid fare amount",
@@ -88,7 +95,8 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
     paymentMutation.mutate({
       vehicleId,
       destination: selectedDestination,
-      amount: fareAmount,
+      amount: totalAmount,
+      passengerCount,
     });
   };
 
@@ -195,16 +203,57 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
           </Select>
         </div>
 
+        {/* Passenger Count Selection */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Number of Passengers
+          </label>
+          <Select value={passengerCount.toString()} onValueChange={(value) => setPassengerCount(parseInt(value))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+                <SelectItem key={count} value={count.toString()}>
+                  {count} {count === 1 ? 'passenger' : 'passengers'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Fare Display */}
         {selectedDestination && (
           <Card className="bg-green-50 border-success mb-6">
             <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-foreground">Fare Amount</span>
-                <span className="text-2xl font-bold text-success">
-                  {formatAmount(fareAmount)}
-                </span>
-              </div>
+              {passengerCount === 1 ? (
+                <div className="flex justify-between items-center">
+                  <span className="text-foreground">Fare Amount</span>
+                  <span className="text-2xl font-bold text-success">
+                    {formatAmount(fareAmount)}
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-foreground">Per Passenger</span>
+                    <span className="text-lg font-medium text-success">
+                      {formatAmount(fareAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-foreground">
+                      Total for {passengerCount} passengers
+                    </span>
+                    <span className="text-2xl font-bold text-success">
+                      {formatAmount(totalAmount)}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+                    Group payment: One payment covers all {passengerCount} passengers
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
