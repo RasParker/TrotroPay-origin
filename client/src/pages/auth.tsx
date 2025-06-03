@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { User, Users, Car, Building2, ArrowLeft } from "lucide-react";
+import { User, Users, Car, Building2, ArrowLeft, Upload } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -42,9 +43,9 @@ export default function AuthPage() {
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
   const [name, setName] = useState("");
+  const [ghanaCard, setGhanaCard] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOnboarding, setIsOnboarding] = useState(true);
-  const [showSignup, setShowSignup] = useState(false);
+  const [currentStep, setCurrentStep] = useState<"onboarding" | "signup" | "signin">("onboarding");
   const [userRole, setUserRole] = useState<string | null>(null);
   const { login } = useAuth();
   const { toast } = useToast();
@@ -55,11 +56,9 @@ export default function AuthPage() {
     const hasSignedUp = localStorage.getItem('hasSignedUp');
     
     if (hasSignedUp && savedRole) {
-      setIsOnboarding(false);
+      setCurrentStep("signin");
       setUserRole(savedRole);
       setSelectedRole(savedRole);
-    } else if (!hasSignedUp) {
-      setShowSignup(true);
     }
   }, []);
 
@@ -99,7 +98,7 @@ export default function AuthPage() {
     if (!name.trim() || !phone.trim() || !pin.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -116,15 +115,18 @@ export default function AuthPage() {
 
     setIsLoading(true);
     try {
-      // Simulate signup - in real app would create user account
+      // Store user data
       localStorage.setItem('hasSignedUp', 'true');
       localStorage.setItem('userName', name);
-      setShowSignup(false);
-      setIsOnboarding(true);
+      localStorage.setItem('userRole', selectedRole || '');
+      
+      // Move to sign in
+      setCurrentStep("signin");
+      setUserRole(selectedRole);
       
       toast({
         title: "Account Created!",
-        description: "Welcome to TrotroPay. Please select your role to continue.",
+        description: "Welcome to TrotroPay. Please sign in to continue.",
       });
     } catch (error) {
       toast({
@@ -139,44 +141,40 @@ export default function AuthPage() {
 
   const handleRoleSelection = (role: string) => {
     setSelectedRole(role);
-    setUserRole(role);
-    localStorage.setItem('userRole', role);
-    setIsOnboarding(false);
-    
-    // Auto-fill test credentials for demo
-    const mockAccounts = {
-      passenger: { phone: "0245678901", pin: "1234" },
-      mate: { phone: "0234567890", pin: "1234" },
-      driver: { phone: "0223456789", pin: "1234" },
-      owner: { phone: "0212345678", pin: "1234" },
-    };
+    setCurrentStep("signup");
+  };
 
-    const account = mockAccounts[role as keyof typeof mockAccounts];
-    if (account) {
-      setPhone(account.phone);
-      setPin(account.pin);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setGhanaCard(file);
+      toast({
+        title: "Document Uploaded",
+        description: "Ghana Card uploaded successfully",
+      });
     }
   };
 
   const handleBackToOnboarding = () => {
     localStorage.removeItem('userRole');
-    setIsOnboarding(true);
-    setUserRole(null);
-    setSelectedRole(null);
-    setPhone("");
-    setPin("");
-  };
-
-  const handleBackToSignup = () => {
     localStorage.removeItem('hasSignedUp');
-    localStorage.removeItem('userRole');
-    setShowSignup(true);
-    setIsOnboarding(true);
+    setCurrentStep("onboarding");
     setUserRole(null);
     setSelectedRole(null);
     setPhone("");
     setPin("");
     setName("");
+    setGhanaCard(null);
+  };
+
+  const handleBackToSignup = () => {
+    setCurrentStep("signup");
+    setPhone("");
+    setPin("");
+  };
+
+  const handleExistingUser = () => {
+    setCurrentStep("signin");
   };
 
   return (
@@ -191,91 +189,13 @@ export default function AuthPage() {
           <p className="text-muted-foreground">Digital payments for Ghana's trotros</p>
         </div>
 
-        {/* Signup Screen for First-Time Users */}
-        {showSignup && (
+        {/* Step 1: Onboarding - Role Selection */}
+        {currentStep === "onboarding" && (
           <div className="mb-8">
-            <h2 className="text-lg font-medium text-center mb-2">Create Your Account</h2>
-            <p className="text-sm text-muted-foreground text-center mb-6">Join TrotroPay and revolutionize your transport payments</p>
+            <h2 className="text-lg font-medium text-center mb-2">Choose Your Role</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">Select how you'll use TrotroPay</p>
             
-            <Card>
-              <CardContent className="p-6">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div>
-                    <Input
-                      type="text"
-                      placeholder="Full Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="text-center"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="tel"
-                      placeholder="Phone Number (e.g., 0245678901)"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="text-center"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="password"
-                      placeholder="Create 4-digit PIN"
-                      value={pin}
-                      onChange={(e) => setPin(e.target.value)}
-                      maxLength={4}
-                      className="text-center"
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Creating Account..." : "Create Account"}
-                  </Button>
-                </form>
-                
-                <div className="mt-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Already have an account?{" "}
-                    <button 
-                      type="button"
-                      className="text-primary hover:underline"
-                      onClick={() => {
-                        setShowSignup(false);
-                        setIsOnboarding(true);
-                      }}
-                    >
-                      Sign In
-                    </button>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Onboarding - Role Selection for New Users */}
-        {isOnboarding && !showSignup && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-medium">Choose Your Role</h2>
-                <p className="text-sm text-muted-foreground">Select how you'll use TrotroPay</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBackToSignup}
-                className="text-muted-foreground"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {roles.map((role) => {
                 const Icon = role.icon;
                 return (
@@ -295,17 +215,23 @@ export default function AuthPage() {
                 );
               })}
             </div>
+
+            <div className="text-center">
+              <Button variant="ghost" onClick={handleExistingUser} className="text-sm">
+                Already have an account? Sign In
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* Returning User - Role-Specific Login */}
-        {!isOnboarding && userRole && (
+        {/* Step 2: Sign Up - Create Account */}
+        {currentStep === "signup" && selectedRole && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-medium">Welcome Back</h2>
+                <h2 className="text-lg font-medium">Create Your Account</h2>
                 <p className="text-sm text-muted-foreground">
-                  Signing in as {roles.find(r => r.id === userRole)?.title}
+                  Registering as {roles.find(r => r.id === selectedRole)?.title}
                 </p>
               </div>
               <Button
@@ -318,69 +244,180 @@ export default function AuthPage() {
               </Button>
             </div>
             
-            <Card className="border-primary bg-primary/5">
-              <CardContent className="p-4 text-center">
-                {(() => {
-                  const currentRole = roles.find(r => r.id === userRole);
-                  const Icon = currentRole?.icon || User;
-                  return (
-                    <>
-                      <div className={`inline-flex p-3 rounded-lg bg-background/50 mb-3 ${currentRole?.color}`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <h3 className="font-medium text-sm mb-1">{currentRole?.title}</h3>
-                      <p className="text-xs text-muted-foreground leading-tight">{currentRole?.description}</p>
-                    </>
-                  );
-                })()}
+            <Card>
+              <CardContent className="p-6">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="text-center"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="tel"
+                      placeholder="Phone Number (e.g., 0245678901)"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="text-center"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Create 4-digit PIN"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      maxLength={4}
+                      className="text-center"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Ghana Card (Optional for verification)
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="outline" size="icon">
+                        <Upload className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {ghanaCard && (
+                      <p className="text-xs text-green-600 mt-1">✓ Document uploaded</p>
+                    )}
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Creating Account..." : "Create Account"}
+                  </Button>
+                </form>
+                
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Already have an account?{" "}
+                    <button 
+                      type="button"
+                      className="text-primary hover:underline"
+                      onClick={handleExistingUser}
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Login Form - Only show after role selection */}
-        {!isOnboarding && selectedRole && (
-          <Card className="flex-1">
-            <CardHeader>
-              <h3 className="text-lg font-medium text-center">Sign In</h3>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <Input
-                    type="tel"
-                    placeholder="Phone Number (e.g., 0245678901)"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="text-center"
-                  />
-                </div>
-                <div>
-                  <Input
-                    type="password"
-                    placeholder="PIN (e.g., 1234)"
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    maxLength={4}
-                    className="text-center"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Signing In..." : "Sign In"}
-                </Button>
-              </form>
-
-              <div className="mt-4 p-3 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground text-center">
-                  Demo credentials filled for {selectedRole}. Click "Sign In" to continue.
+        {/* Step 3: Sign In - Returning Users */}
+        {currentStep === "signin" && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-medium">Welcome Back</h2>
+                <p className="text-sm text-muted-foreground">
+                  {userRole ? `Signing in as ${roles.find(r => r.id === userRole)?.title}` : "Sign in to continue"}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBackToOnboarding}
+                className="text-muted-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            {userRole && (
+              <Card className="border-primary bg-primary/5 mb-4">
+                <CardContent className="p-4 text-center">
+                  {(() => {
+                    const currentRole = roles.find(r => r.id === userRole);
+                    const Icon = currentRole?.icon || User;
+                    return (
+                      <>
+                        <div className={`inline-flex p-3 rounded-lg bg-background/50 mb-3 ${currentRole?.color}`}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <h3 className="font-medium text-sm mb-1">{currentRole?.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-tight">{currentRole?.description}</p>
+                      </>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="flex-1">
+              <CardHeader>
+                <h3 className="text-lg font-medium text-center">Sign In</h3>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <Input
+                      type="tel"
+                      placeholder="Phone Number (e.g., 0245678901)"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="text-center"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="PIN (e.g., 1234)"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      maxLength={4}
+                      className="text-center"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Signing In..." : "Sign In"}
+                  </Button>
+                </form>
+
+                <div className="mt-4 p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Demo credentials: Phone: 0245678901, PIN: 1234
+                  </p>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    New to TrotroPay?{" "}
+                    <button 
+                      type="button"
+                      className="text-primary hover:underline"
+                      onClick={handleBackToOnboarding}
+                    >
+                      Create Account
+                    </button>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
