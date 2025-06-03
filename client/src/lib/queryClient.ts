@@ -27,7 +27,8 @@ export async function apiRequest(method: string, url: string, body?: any) {
   }
 
   const response = await fetch(url, config);
-  return response;
+  await throwIfResNotOk(response);
+  return response.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
