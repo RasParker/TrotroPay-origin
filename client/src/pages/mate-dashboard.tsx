@@ -229,6 +229,16 @@ export default function MateDashboard() {
               <span className="text-xs">Earnings</span>
             </div>
           </Button>
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/profile")}
+          >
+            <div className="text-center">
+              <User className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">Profile</span>
+            </div>
+          </Button>
         </div>
       </div>
     </div>

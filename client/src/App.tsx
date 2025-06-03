@@ -12,6 +12,7 @@ import OwnerDashboard from "@/pages/owner-dashboard";
 import PaymentFlow from "@/pages/payment-flow";
 import PassengerHistory from "@/pages/passenger-history";
 import PassengerProfile from "@/pages/passenger-profile";
+import MateProfile from "@/pages/mate-profile";
 import TopUpPage from "@/pages/top-up";
 import NotificationsPage from "@/pages/notifications";
 import QRCodeDisplay from "@/pages/qr-code-display";
@@ -61,6 +62,11 @@ function AppRouter() {
     return <PassengerHistory onBack={() => setLocation("/")} />;
   }
   if (location === "/profile") {
+    if (user.role === "passenger") {
+      return <PassengerProfile onBack={() => setLocation("/")} />;
+    } else if (user.role === "mate") {
+      return <MateProfile onBack={() => setLocation("/")} />;
+    }
     return <PassengerProfile onBack={() => setLocation("/")} />;
   }
   if (location === "/top-up") {
