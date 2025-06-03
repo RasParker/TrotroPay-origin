@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ export default function PassengerDashboard() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/passenger/${user?.id}`],
@@ -91,7 +93,12 @@ export default function PassengerDashboard() {
             <p className="text-green-200 text-sm">Ready for your journey?</p>
           </div>
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white"
+              onClick={() => setLocation("/notifications")}
+            >
               <Bell className="h-5 w-5" />
             </Button>
             <Button 
@@ -121,6 +128,7 @@ export default function PassengerDashboard() {
                 variant="secondary" 
                 size="sm"
                 className="bg-white/20 text-white border-0 hover:bg-white/30"
+                onClick={() => setLocation("/top-up")}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Top Up
@@ -157,7 +165,12 @@ export default function PassengerDashboard() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Recent Trips</h3>
-            <Button variant="ghost" size="sm" className="text-primary">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary"
+              onClick={() => setLocation("/history")}
+            >
               View All
             </Button>
           </div>
@@ -218,13 +231,21 @@ export default function PassengerDashboard() {
               <span className="text-xs">Home</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/history")}
+          >
             <div className="text-center">
               <History className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">History</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/profile")}
+          >
             <div className="text-center">
               <User className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Profile</span>

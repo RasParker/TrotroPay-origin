@@ -41,7 +41,7 @@ function AppRouter() {
     return <AuthPage />;
   }
 
-  // Handle payment flow routing
+  // Handle special routing
   if (location.startsWith("#payment/")) {
     const vehicleId = location.split("/")[1];
     return (
@@ -52,7 +52,33 @@ function AppRouter() {
     );
   }
 
-  // Route based on user role
+  // Handle page navigation
+  if (location === "/history") {
+    return <PassengerHistory onBack={() => setLocation("/")} />;
+  }
+  if (location === "/profile") {
+    return <PassengerProfile onBack={() => setLocation("/")} />;
+  }
+  if (location === "/top-up") {
+    return <TopUpPage onBack={() => setLocation("/")} />;
+  }
+  if (location === "/notifications") {
+    return <NotificationsPage onBack={() => setLocation("/")} />;
+  }
+  if (location === "/qr-code") {
+    return <QRCodeDisplay onBack={() => setLocation("/")} />;
+  }
+  if (location === "/earnings") {
+    return <EarningsPage onBack={() => setLocation("/")} />;
+  }
+  if (location === "/performance") {
+    return <DriverPerformance onBack={() => setLocation("/")} />;
+  }
+  if (location === "/settings") {
+    return <SettingsPage onBack={() => setLocation("/")} />;
+  }
+
+  // Route based on user role (default dashboard)
   switch (user.role) {
     case "passenger":
       return <PassengerDashboard />;
