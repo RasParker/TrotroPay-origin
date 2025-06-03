@@ -154,52 +154,78 @@ export default function PassengerDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <Button
-            onClick={() => setShowQRScanner(true)}
-            className="h-20 bg-white text-primary border-2 border-primary hover:bg-blue-50"
-            variant="outline"
-          >
-            <div className="text-center">
-              <QrCode className="h-6 w-6 mx-auto mb-2" />
-              <span className="font-medium">Scan QR</span>
-            </div>
-          </Button>
-          <Button
-            onClick={() => setShowManualEntry(true)}
-            className="h-20"
-            variant="outline"
-          >
-            <div className="text-center">
-              <Edit3 className="h-6 w-6 mx-auto mb-2" />
-              <span className="font-medium">Enter ID</span>
-            </div>
-          </Button>
-        </div>
-
-        {/* Group Payment Demo */}
-        <Card className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-0">
-            <button
-              onClick={() => {
-                setPaymentVehicleId("GT-1234-20");
-                setShowPaymentFlow(true);
-              }}
-              className="w-full p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg shadow-md hover:from-green-600 hover:to-emerald-700 active:scale-98 transition-all duration-200"
-            >
-              <div className="flex items-center justify-center space-x-3">
-                <div className="bg-white/20 p-2 rounded-full">
-                  <Users className="h-6 w-6" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold text-lg">Try Group Payment</div>
-                  <div className="text-green-100 text-sm">Pay for multiple passengers</div>
+        {/* Payment Options */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-4">Choose Payment Type</h3>
+          
+          {/* Self Payment */}
+          <Card className="mb-4 border-blue-200 bg-blue-50/50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-blue-100 p-2 rounded-full">
+                    <User className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-blue-900">Pay for Yourself</h4>
+                    <p className="text-sm text-blue-600">Single passenger payment</p>
+                  </div>
                 </div>
               </div>
-            </button>
-          </CardContent>
-        </Card>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => setShowQRScanner(true)}
+                  className="h-14 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <div className="text-center">
+                    <QrCode className="h-5 w-5 mx-auto mb-1" />
+                    <span className="text-sm">Scan QR</span>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => setShowManualEntry(true)}
+                  className="h-14 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <div className="text-center">
+                    <Edit3 className="h-5 w-5 mx-auto mb-1" />
+                    <span className="text-sm">Enter ID</span>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Group Payment */}
+          <Card className="border-green-200 bg-green-50/50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <Users className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-green-900">Pay for Group</h4>
+                    <p className="text-sm text-green-600">Multiple passengers (2-8 people)</p>
+                  </div>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => {
+                  setPaymentVehicleId("GT-1234-20");
+                  setShowPaymentFlow(true);
+                }}
+                className="w-full h-14 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <Users className="h-5 w-5" />
+                  <span>Try Group Payment</span>
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Recent Trips */}
         <div className="mb-6">
