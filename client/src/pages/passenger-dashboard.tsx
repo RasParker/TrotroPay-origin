@@ -33,7 +33,7 @@ export default function PassengerDashboard() {
   const handleQRScan = (vehicleId: string) => {
     setShowQRScanner(false);
     // Navigate to payment flow with the scanned vehicle ID
-    window.location.hash = `#payment/${vehicleId}`;
+    setLocation(`#payment/${vehicleId}`);
   };
 
   const handleManualEntry = () => {
@@ -46,7 +46,7 @@ export default function PassengerDashboard() {
       return;
     }
     setShowManualEntry(false);
-    window.location.hash = `#payment/${manualVehicleId}`;
+    setLocation(`#payment/${manualVehicleId}`);
   };
 
   const formatAmount = (amount: string) => `GH₵ ${parseFloat(amount).toFixed(2)}`;
@@ -169,7 +169,9 @@ export default function PassengerDashboard() {
         <div className="mb-6">
           <Button
             onClick={() => {
+              console.log("Group payment button clicked");
               setLocation("#payment/GT-1234-20");
+              console.log("Location set to:", "#payment/GT-1234-20");
             }}
             className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700"
           >
