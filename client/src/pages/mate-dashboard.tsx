@@ -22,6 +22,7 @@ export default function MateDashboard() {
   const { user, logout } = useAuth();
   const { lastMessage } = useRealtimeUpdates();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const { data: dashboardData, isLoading, refetch } = useQuery({
     queryKey: [`/api/dashboard/mate/${user?.id}`],
@@ -78,7 +79,12 @@ export default function MateDashboard() {
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white"
+              onClick={() => setLocation("/notifications")}
+            >
               <Bell className="h-5 w-5" />
             </Button>
             <Button 
@@ -223,13 +229,21 @@ export default function MateDashboard() {
               <span className="text-xs">Dashboard</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/qr-code")}
+          >
             <div className="text-center">
               <QrCode className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">QR Code</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/earnings")}
+          >
             <div className="text-center">
               <DollarSign className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Earnings</span>
