@@ -310,34 +310,34 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
 
       {/* Success Modal */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-        <DialogContent className="w-full max-w-sm mx-4">
-          <div className="text-center py-6">
-            <div className="w-16 h-16 bg-success rounded-full mx-auto mb-4 flex items-center justify-center">
+        <DialogContent className="w-[90vw] max-w-sm mx-auto top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+          <div className="text-center py-6 px-4">
+            <div className="w-16 h-16 bg-green-500 rounded-full mx-auto mb-4 flex items-center justify-center">
               <CheckCircle className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">
+            <h3 className="text-xl font-bold mb-2">
               Payment Successful!
             </h3>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-gray-600 mb-6 leading-relaxed">
               {passengerCount === 1 ? (
                 <>
-                  Your fare of <span className="font-medium text-success">
+                  Your fare of <span className="font-medium text-green-600">
                     {formatAmount(totalAmount)}
-                  </span> has been paid successfully to {vehicle.vehicleId}.
+                  </span> has been paid successfully to {vehicle?.vehicleId}.
                 </>
               ) : (
                 <>
-                  Group payment of <span className="font-medium text-success">
+                  Group payment of <span className="font-medium text-green-600">
                     {formatAmount(totalAmount)}
-                  </span> for {passengerCount} passengers has been paid successfully to {vehicle.vehicleId}.
+                  </span> for {passengerCount} passengers has been paid successfully to {vehicle?.vehicleId}.
                   <br />
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-sm text-gray-500 mt-2 block">
                     ({formatAmount(fareAmount)} per passenger)
                   </span>
                 </>
               )}
             </p>
-            <Button onClick={handleSuccessClose} className="w-full">
+            <Button onClick={handleSuccessClose} className="w-full bg-primary hover:bg-primary/90">
               Continue
             </Button>
           </div>
