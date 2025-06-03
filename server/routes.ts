@@ -225,6 +225,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  
+
   // Payment processing
   app.post("/api/payments/process", async (req, res) => {
     try {

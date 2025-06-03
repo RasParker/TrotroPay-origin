@@ -30,7 +30,7 @@ export default function MateDashboard() {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
-  // Handle real-time payment notifications
+  // Handle real-time notifications
   useEffect(() => {
     if (lastMessage?.type === "payment_received") {
       toast({
@@ -114,6 +114,8 @@ export default function MateDashboard() {
             </CardContent>
           </Card>
         )}
+
+        
 
         
 
