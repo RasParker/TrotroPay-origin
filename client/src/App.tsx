@@ -19,6 +19,7 @@ import QRCodeDisplay from "@/pages/qr-code-display";
 import EarningsPage from "@/pages/earnings";
 import DriverPerformance from "@/pages/driver-performance";
 import SettingsPage from "@/pages/settings";
+import FareCalculator from "@/pages/fare-calculator";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
@@ -86,6 +87,9 @@ function AppRouter() {
   }
   if (location === "/settings") {
     return <SettingsPage onBack={() => setLocation("/")} />;
+  }
+  if (location === "/fare-calculator") {
+    return <FareCalculator onBack={() => setLocation("/")} />;
   }
 
   // Route based on user role (default dashboard)
