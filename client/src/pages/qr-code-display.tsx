@@ -15,19 +15,17 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [vehicleId, setVehicleId] = useState<string>("");
-  const [refreshKey, setRefreshKey] = useState<number>(0);
-
   // Get user's vehicle info first
   const { data: dashboardData } = useQuery({
     queryKey: [`/api/dashboard/mate/${user?.id}`],
     enabled: !!user?.id && user.role === "mate",
   });
 
-  // Get QR code once we have vehicle ID
+  // Get static QR code once we have vehicle ID
   const { data: qrData, isLoading } = useQuery({
-    queryKey: [`/api/qr-code/${vehicleId}`, refreshKey],
+    queryKey: [`/api/qr-code/${vehicleId}`],
     enabled: !!vehicleId,
-    staleTime: 0,
+    staleTime: Infinity, // Cache forever since QR code is static
   });
 
   useEffect(() => {
@@ -36,11 +34,10 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
     }
   }, [dashboardData]);
 
-  const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+  const handlePrintInfo = () => {
     toast({
-      title: "QR Code Refreshed",
-      description: "Generated a new QR code for payments",
+      title: "Print-Ready QR Code",
+      description: "This QR code can be printed and displayed permanently",
     });
   };
 
@@ -108,7 +105,7 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
               Scan to Pay Fare
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Passengers can scan this code to pay their trotro fare
+              Static QR code - can be printed and displayed permanently
             </p>
             
             <div className="bg-muted p-3 rounded-lg mb-4">
@@ -119,12 +116,12 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={handleRefresh}
+              onClick={handlePrintInfo}
               disabled={isLoading}
               className="mb-4"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh QR Code
+              <QrCode className="w-4 h-4 mr-2" />
+              Print-Ready Code
             </Button>
           </CardContent>
         </Card>
@@ -148,7 +145,7 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-start space-x-2">
                 <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">1</div>
-                <p>Show this QR code to passengers</p>
+                <p>Display QR code to passengers or print and post it</p>
               </div>
               <div className="flex items-start space-x-2">
                 <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">2</div>
@@ -156,7 +153,7 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
               </div>
               <div className="flex items-start space-x-2">
                 <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">3</div>
-                <p>Payment notifications appear instantly</p>
+                <p>Payment notifications appear instantly on your phone</p>
               </div>
             </div>
           </CardContent>
