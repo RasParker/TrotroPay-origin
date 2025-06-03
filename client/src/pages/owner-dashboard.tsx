@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +16,12 @@ import {
   DollarSign
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OwnerDashboard() {
   const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/owner/${user?.id}`],
@@ -54,7 +58,12 @@ export default function OwnerDashboard() {
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white"
+              onClick={() => setLocation("/notifications")}
+            >
               <Bell className="h-5 w-5" />
             </Button>
             <Button 
