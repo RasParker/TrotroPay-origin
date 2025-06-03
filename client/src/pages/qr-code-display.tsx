@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, QrCode, Download, Share2, RefreshCw } from "lucide-react";
@@ -13,7 +13,9 @@ interface QRCodeDisplayProps {
 export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [vehicleId, setVehicleId] = useState<string>("");
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   // Get user's vehicle info first
   const { data: dashboardData } = useQuery({
@@ -22,9 +24,10 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
   });
 
   // Get QR code once we have vehicle ID
-  const { data: qrData, isLoading, refetch } = useQuery({
-    queryKey: [`/api/qr-code/${vehicleId}`],
+  const { data: qrData, isLoading } = useQuery({
+    queryKey: [`/api/qr-code/${vehicleId}`, refreshKey],
     enabled: !!vehicleId,
+    staleTime: 0,
   });
 
   useEffect(() => {
@@ -32,6 +35,14 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
       setVehicleId(dashboardData.vehicle.vehicleId);
     }
   }, [dashboardData]);
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+    toast({
+      title: "QR Code Refreshed",
+      description: "Generated a new QR code for payments",
+    });
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -108,7 +119,7 @@ export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => refetch()}
+              onClick={handleRefresh}
               disabled={isLoading}
               className="mb-4"
             >
