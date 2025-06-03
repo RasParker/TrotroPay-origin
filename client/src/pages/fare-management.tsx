@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, DollarSign, MapPin, Plus, Minus, Save } from "lucide-react";
+import { ArrowLeft, Edit, MapPin, Plus, Minus, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth";
@@ -149,7 +149,7 @@ export default function FareManagement({ onBack }: FareManagementProps) {
                   className="w-full mt-4"
                   disabled={updateFaresMutation.isPending}
                 >
-                  <DollarSign className="h-4 w-4 mr-2" />
+                  <Edit className="h-4 w-4 mr-2" />
                   Update Fares (₵)
                 </Button>
               </div>
@@ -175,7 +175,7 @@ export default function FareManagement({ onBack }: FareManagementProps) {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <DollarSign className="h-5 w-5" />
+                <Edit className="h-5 w-5" />
                 <span>Edit Fares - {editingRoute.name}</span>
               </CardTitle>
             </CardHeader>
