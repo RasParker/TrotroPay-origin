@@ -169,9 +169,7 @@ export default function PassengerDashboard() {
         <div className="mb-6">
           <Button
             onClick={() => {
-              setManualVehicleId("GT-1234-20");
-              setShowManualEntry(false);
-              window.location.hash = "#payment/GT-1234-20";
+              setLocation("#payment/GT-1234-20");
             }}
             className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700"
           >
