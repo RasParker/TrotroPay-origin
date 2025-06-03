@@ -23,6 +23,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "30 minutes ago", 
           type: "success" as const,
           icon: <CheckCircle className="h-5 w-5" />,
+          read: false,
         },
         {
           id: 2,
@@ -31,6 +32,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "2 hours ago",
           type: "warning" as const,
           icon: <AlertTriangle className="h-5 w-5" />,
+          read: false,
         },
         {
           id: 3,
@@ -39,6 +41,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "4 hours ago",
           type: "warning" as const,
           icon: <AlertTriangle className="h-5 w-5" />,
+          read: true,
         },
         {
           id: 4,
@@ -47,6 +50,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "6 hours ago",
           type: "info" as const,
           icon: <Info className="h-5 w-5" />,
+          read: true,
         },
         {
           id: 5,
@@ -55,6 +59,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "1 day ago",
           type: "info" as const,
           icon: <FileText className="h-5 w-5" />,
+          read: true,
         },
         {
           id: 6,
@@ -63,6 +68,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "2 days ago",
           type: "warning" as const,
           icon: <AlertTriangle className="h-5 w-5" />,
+          read: true,
         },
       ];
     } else if (userRole === "driver") {
@@ -74,6 +80,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "1 hour ago",
           type: "success" as const,
           icon: <CheckCircle className="h-5 w-5" />,
+          read: false,
         },
         {
           id: 2,
@@ -82,6 +89,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "3 hours ago",
           type: "info" as const,
           icon: <Info className="h-5 w-5" />,
+          read: true,
         },
         {
           id: 3,
@@ -90,6 +98,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "1 day ago",
           type: "warning" as const,
           icon: <AlertTriangle className="h-5 w-5" />,
+          read: true,
         },
       ];
     } else if (userRole === "mate") {
@@ -101,6 +110,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "2 minutes ago",
           type: "success" as const,
           icon: <CheckCircle className="h-5 w-5" />,
+          read: false,
         },
         {
           id: 2,
@@ -109,6 +119,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "1 hour ago",
           type: "success" as const,
           icon: <CheckCircle className="h-5 w-5" />,
+          read: false,
         },
         {
           id: 3,
@@ -117,6 +128,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "4 hours ago",
           type: "info" as const,
           icon: <Info className="h-5 w-5" />,
+          read: true,
         },
       ];
     } else {
@@ -129,6 +141,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "10 minutes ago",
           type: "success" as const,
           icon: <CheckCircle className="h-5 w-5" />,
+          read: false,
         },
         {
           id: 2,
@@ -137,6 +150,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "2 hours ago",
           type: "warning" as const,
           icon: <AlertTriangle className="h-5 w-5" />,
+          read: true,
         },
         {
           id: 3,
@@ -145,6 +159,7 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
           time: "1 day ago",
           type: "info" as const,
           icon: <FileText className="h-5 w-5" />,
+          read: true,
         },
       ];
     }
@@ -165,7 +180,13 @@ export default function NotificationsPage({ onBack }: NotificationsPageProps) {
     }
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (time: string | Date) => {
+    // If it's already a formatted string like "30 minutes ago", return as is
+    if (typeof time === "string" && time.includes("ago")) {
+      return time;
+    }
+    
+    const date = new Date(time);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / (1000 * 60));
