@@ -161,6 +161,24 @@ export default function PassengerDashboard() {
           </Button>
         </div>
 
+        {/* Group Payment Demo */}
+        <div className="mb-6">
+          <Button
+            onClick={() => {
+              setManualVehicleId("GT-1234-20");
+              setShowManualEntry(false);
+              window.location.hash = "#payment/GT-1234-20";
+            }}
+            className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700"
+          >
+            <div className="text-center">
+              <Users className="h-6 w-6 mx-auto mb-1" />
+              <span className="font-medium">Try Group Payment</span>
+              <p className="text-xs opacity-90">Pay for multiple passengers</p>
+            </div>
+          </Button>
+        </div>
+
         {/* Recent Trips */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
