@@ -35,7 +35,20 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
     },
     onSuccess: (data) => {
       console.log('Fare calculation result:', data);
-      setFareResult(data);
+      try {
+        if (data && typeof data === 'object') {
+          setFareResult(data);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('Error setting fare result:', error);
+        toast({
+          title: "Display Error",
+          description: "Failed to display fare calculation",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -177,7 +190,7 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
         </Card>
 
         {/* Fare Result */}
-        {fareResult && (
+        {fareResult && fareResult.amount !== undefined && (
           <Card className="mb-4">
             <CardHeader>
               <CardTitle className="text-green-600">Fare Calculation</CardTitle>
@@ -187,20 +200,20 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Journey</span>
                   <div className="flex items-center space-x-2 text-sm">
-                    <span>{fareResult.boardingStop}</span>
+                    <span>{fareResult.boardingStop || 'N/A'}</span>
                     <ArrowRight className="h-4 w-4" />
-                    <span>{fareResult.alightingStop}</span>
+                    <span>{fareResult.alightingStop || 'N/A'}</span>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Distance</span>
-                  <span className="text-sm">{fareResult.distance} stops</span>
+                  <span className="text-sm">{fareResult.distance || 0} stops</span>
                 </div>
                 
                 <div className="flex items-center justify-between text-lg font-semibold">
                   <span>Fare Amount</span>
-                  <span className="text-green-600">GH₵ {fareResult.amount.toFixed(2)}</span>
+                  <span className="text-green-600">GH₵ {Number(fareResult.amount || 0).toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
