@@ -20,6 +20,7 @@ import EarningsPage from "@/pages/earnings";
 import DriverPerformance from "@/pages/driver-performance";
 import SettingsPage from "@/pages/settings";
 import FareCalculator from "@/pages/fare-calculator";
+import FareManagement from "@/pages/fare-management";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
@@ -90,6 +91,9 @@ function AppRouter() {
   }
   if (location === "/fare-calculator") {
     return <FareCalculator onBack={() => setLocation("/")} />;
+  }
+  if (location === "/fare-management") {
+    return <FareManagement onBack={() => setLocation("/")} />;
   }
 
   // Route based on user role (default dashboard)

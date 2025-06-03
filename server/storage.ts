@@ -29,6 +29,7 @@ export interface IStorage {
   getRouteByName(name: string): Promise<Route | undefined>;
   getAllRoutes(): Promise<Route[]>;
   createRoute(route: InsertRoute): Promise<Route>;
+  updateRoute(id: number, updates: Partial<Route>): Promise<Route | undefined>;
 
   // Transactions
   getTransaction(id: number): Promise<Transaction | undefined>;
@@ -125,6 +126,15 @@ export class DatabaseStorage implements IStorage {
       .values(insertRoute)
       .returning();
     return route;
+  }
+
+  async updateRoute(id: number, updates: Partial<Route>): Promise<Route | undefined> {
+    const [route] = await db
+      .update(routes)
+      .set(updates)
+      .where(eq(routes.id, id))
+      .returning();
+    return route || undefined;
   }
 
   async getTransaction(id: number): Promise<Transaction | undefined> {

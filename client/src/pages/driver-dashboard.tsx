@@ -275,6 +275,16 @@ export default function DriverDashboard() {
           <Button 
             variant="ghost" 
             className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/fare-management")}
+          >
+            <div className="text-center">
+              <DollarSign className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">Fares</span>
+            </div>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
             onClick={() => setLocation("/settings")}
           >
             <div className="text-center">
