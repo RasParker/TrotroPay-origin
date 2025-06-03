@@ -12,6 +12,13 @@ const loginSchema = z.object({
   pin: z.string().min(4),
 });
 
+const registerSchema = z.object({
+  name: z.string().min(1),
+  phone: z.string().min(10),
+  pin: z.string().min(4),
+  role: z.string(),
+});
+
 const paymentSchema = z.object({
   vehicleId: z.string(),
   destination: z.string(),
@@ -76,6 +83,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Auth routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { name, phone, pin, role } = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByPhone(phone);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      // Create new user
+      const newUser = await storage.createUser({
+        name,
+        phone,
+        pin,
+        role,
+        momoBalance: role === "passenger" ? "25.40" : "0.00", // Give passengers starting balance
+      });
+
+      req.session.userId = newUser.id;
+      res.json({ user: { ...newUser, pin: undefined } });
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { phone, pin } = loginSchema.parse(req.body);

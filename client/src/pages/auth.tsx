@@ -115,23 +115,43 @@ export default function AuthPage() {
 
     setIsLoading(true);
     try {
-      // Store user data
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          pin: pin.trim(),
+          role: selectedRole,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Registration failed");
+      }
+
+      const data = await response.json();
+      
+      // Store user data for UI state
       localStorage.setItem('hasSignedUp', 'true');
       localStorage.setItem('userName', name);
       localStorage.setItem('userRole', selectedRole || '');
       
-      // Move to sign in
-      setCurrentStep("signin");
-      setUserRole(selectedRole);
+      // Auto-login the user after successful registration
+      await login(phone.trim(), pin.trim());
       
       toast({
         title: "Account Created!",
-        description: "Welcome to TrotroPay. Please sign in to continue.",
+        description: "Welcome to TrotroPay. You're now signed in.",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Signup Failed",
-        description: "Please try again",
+        description: error.message || "Please try again",
         variant: "destructive",
       });
     } finally {
