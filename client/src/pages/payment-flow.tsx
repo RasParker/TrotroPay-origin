@@ -15,11 +15,13 @@ interface PaymentFlowProps {
 }
 
 export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
-  const [selectedDestination, setSelectedDestination] = useState("");
+  const [boardingStop, setBoardingStop] = useState("");
+  const [alightingStop, setAlightingStop] = useState("");
   const [fareAmount, setFareAmount] = useState("0.00");
   const [passengerCount, setPassengerCount] = useState(1);
   const [totalAmount, setTotalAmount] = useState("0.00");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [fareCalculation, setFareCalculation] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,6 +34,40 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const { data: route } = useQuery({
     queryKey: [`/api/routes/${vehicle?.route}`],
     enabled: !!vehicle?.route,
+  });
+
+  // Fetch route details by name to get route ID
+  const { data: routeDetails } = useQuery({
+    queryKey: ['/api/routes'],
+    select: (routes: any[]) => routes.find(r => r.name === vehicle?.route),
+    enabled: !!vehicle?.route,
+  });
+
+  // Fare calculation mutation
+  const fareCalculationMutation = useMutation({
+    mutationFn: async ({ routeId, boardingStop, alightingStop }: { 
+      routeId: number; 
+      boardingStop: string; 
+      alightingStop: string; 
+    }) => {
+      return apiRequest('POST', `/api/routes/${routeId}/calculate-fare`, {
+        boardingStop,
+        alightingStop
+      });
+    },
+    onSuccess: (data) => {
+      setFareCalculation(data);
+      setFareAmount(data.amount.toFixed(2));
+      const total = (data.amount * passengerCount).toFixed(2);
+      setTotalAmount(total);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fare Calculation Error",
+        description: error.message || "Failed to calculate fare",
+        variant: "destructive",
+      });
+    },
   });
 
   const paymentMutation = useMutation({

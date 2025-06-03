@@ -336,6 +336,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Calculate fare between two stops on a route
+  app.post("/api/routes/:routeId/calculate-fare", async (req, res) => {
+    try {
+      const { routeId } = req.params;
+      const { boardingStop, alightingStop } = req.body;
+
+      if (!boardingStop || !alightingStop) {
+        return res.status(400).json({ 
+          error: "Both boarding and alighting stops are required" 
+        });
+      }
+
+      const route = await storage.getRoute(parseInt(routeId));
+      if (!route) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      // Import fare calculator
+      const { calculateFare } = await import("@shared/fare-calculator");
+      
+      const fareCalculation = calculateFare(route, boardingStop, alightingStop);
+      
+      res.json(fareCalculation);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Update vehicle route (for drivers)
   app.put("/api/vehicles/:vehicleId/route", async (req, res) => {
     try {
