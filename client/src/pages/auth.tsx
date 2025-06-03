@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { User, Users, Car, Building2, ArrowLeft, Upload } from "lucide-react";
+import { User, Users, Bus, Building2, ArrowLeft, Upload } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,7 +26,7 @@ const roles = [
     id: "driver",
     title: "Driver", 
     description: "Track your vehicle earnings",
-    icon: Car,
+    icon: Bus,
     color: "text-orange-600",
   },
   {
@@ -233,7 +233,7 @@ export default function AuthPage() {
         {/* Header */}
         <div className="text-center mb-8 mt-8">
           <div className="w-20 h-20 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
-            <Car className="h-10 w-10 text-white" />
+            <Bus className="h-10 w-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">TrotroPay</h1>
           <p className="text-muted-foreground">Digital payments for Ghana's trotros</p>

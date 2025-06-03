@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
-  Car, 
+  Bus, 
   TrendingUp, 
   Users, 
   Bell, 
@@ -136,7 +136,7 @@ export default function DriverDashboard() {
         {dashboardData?.vehicle && (
           <Card className="gradient-accent text-white mb-4">
             <CardContent className="p-4 text-center">
-              <Car className="h-8 w-8 mx-auto mb-2" />
+              <Bus className="h-8 w-8 mx-auto mb-2" />
               <h3 className="text-xl font-medium mb-1">
                 {dashboardData.vehicle.vehicleId}
               </h3>
@@ -258,7 +258,7 @@ export default function DriverDashboard() {
         <div className="flex">
           <Button variant="ghost" className="flex-1 py-3 text-accent">
             <div className="text-center">
-              <Car className="h-5 w-5 mx-auto mb-1" />
+              <Bus className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Dashboard</span>
             </div>
           </Button>
