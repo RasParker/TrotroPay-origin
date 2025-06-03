@@ -41,8 +41,10 @@ export default function AuthPage() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOnboarding, setIsOnboarding] = useState(true);
+  const [showSignup, setShowSignup] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const { login } = useAuth();
   const { toast } = useToast();
@@ -50,10 +52,14 @@ export default function AuthPage() {
   // Check if user has completed onboarding
   useEffect(() => {
     const savedRole = localStorage.getItem('userRole');
-    if (savedRole) {
+    const hasSignedUp = localStorage.getItem('hasSignedUp');
+    
+    if (hasSignedUp && savedRole) {
       setIsOnboarding(false);
       setUserRole(savedRole);
       setSelectedRole(savedRole);
+    } else if (!hasSignedUp) {
+      setShowSignup(true);
     }
   }, []);
 
@@ -80,6 +86,50 @@ export default function AuthPage() {
       toast({
         title: "Login Failed",
         description: "Invalid phone number or PIN",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name.trim() || !phone.trim() || !pin.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (pin.length !== 4) {
+      toast({
+        title: "Invalid PIN",
+        description: "PIN must be exactly 4 digits",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Simulate signup - in real app would create user account
+      localStorage.setItem('hasSignedUp', 'true');
+      localStorage.setItem('userName', name);
+      setShowSignup(false);
+      setIsOnboarding(true);
+      
+      toast({
+        title: "Account Created!",
+        description: "Welcome to TrotroPay. Please select your role to continue.",
+      });
+    } catch (error) {
+      toast({
+        title: "Signup Failed",
+        description: "Please try again",
         variant: "destructive",
       });
     } finally {
@@ -117,6 +167,18 @@ export default function AuthPage() {
     setPin("");
   };
 
+  const handleBackToSignup = () => {
+    localStorage.removeItem('hasSignedUp');
+    localStorage.removeItem('userRole');
+    setShowSignup(true);
+    setIsOnboarding(true);
+    setUserRole(null);
+    setSelectedRole(null);
+    setPhone("");
+    setPin("");
+    setName("");
+  };
+
   return (
     <div className="mobile-container">
       <div className="p-6 min-h-screen flex flex-col">
@@ -129,11 +191,89 @@ export default function AuthPage() {
           <p className="text-muted-foreground">Digital payments for Ghana's trotros</p>
         </div>
 
-        {/* Onboarding - Role Selection for New Users */}
-        {isOnboarding && (
+        {/* Signup Screen for First-Time Users */}
+        {showSignup && (
           <div className="mb-8">
-            <h2 className="text-lg font-medium text-center mb-2">Get Started</h2>
-            <p className="text-sm text-muted-foreground text-center mb-6">Choose your role to continue</p>
+            <h2 className="text-lg font-medium text-center mb-2">Create Your Account</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">Join TrotroPay and revolutionize your transport payments</p>
+            
+            <Card>
+              <CardContent className="p-6">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="text-center"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="tel"
+                      placeholder="Phone Number (e.g., 0245678901)"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="text-center"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Create 4-digit PIN"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      maxLength={4}
+                      className="text-center"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Creating Account..." : "Create Account"}
+                  </Button>
+                </form>
+                
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Already have an account?{" "}
+                    <button 
+                      type="button"
+                      className="text-primary hover:underline"
+                      onClick={() => {
+                        setShowSignup(false);
+                        setIsOnboarding(true);
+                      }}
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Onboarding - Role Selection for New Users */}
+        {isOnboarding && !showSignup && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-medium">Choose Your Role</h2>
+                <p className="text-sm text-muted-foreground">Select how you'll use TrotroPay</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBackToSignup}
+                className="text-muted-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </div>
             
             <div className="grid grid-cols-2 gap-3">
               {roles.map((role) => {
