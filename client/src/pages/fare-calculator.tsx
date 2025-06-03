@@ -34,6 +34,7 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
       });
     },
     onSuccess: (data) => {
+      console.log('Fare calculation result:', data);
       setFareResult(data);
     },
     onError: (error: any) => {
@@ -45,7 +46,7 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
     },
   });
 
-  const selectedRouteData = routes ? routes.find((r: any) => r.id === parseInt(selectedRoute)) : null;
+  const selectedRouteData = routes && Array.isArray(routes) ? routes.find((r: any) => r.id === parseInt(selectedRoute)) : null;
   
   // Get valid alighting stops based on boarding stop
   const getValidAlightingStops = () => {
@@ -110,7 +111,7 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
                   <SelectValue placeholder="Choose a route" />
                 </SelectTrigger>
                 <SelectContent>
-                  {routes && routes.map((route: any) => (
+                  {routes && Array.isArray(routes) && routes.map((route: any) => (
                     <SelectItem key={route.id} value={route.id.toString()}>
                       {route.name}
                     </SelectItem>
