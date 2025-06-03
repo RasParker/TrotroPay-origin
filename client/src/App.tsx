@@ -23,6 +23,9 @@ import NotFound from "@/pages/not-found";
 function AppRouter() {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
+  
+  // Debug logging
+  console.log("Current location in AppRouter:", location);
 
   if (isLoading) {
     return (
@@ -41,9 +44,10 @@ function AppRouter() {
     return <AuthPage />;
   }
 
-  // Handle special routing
-  if (location.startsWith("#payment/")) {
-    const vehicleId = location.split("/")[1];
+  // Handle special routing - check for payment routes
+  if (location.includes("payment/")) {
+    const vehicleId = location.split("/").pop() || location.replace("#payment/", "");
+    console.log("Payment flow detected, vehicleId:", vehicleId);
     return (
       <PaymentFlow 
         vehicleId={vehicleId} 
