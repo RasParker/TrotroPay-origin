@@ -284,7 +284,7 @@ export default function DriverDashboard() {
 
       {/* Route Selection Dialog */}
       <Dialog open={showRouteDialog} onOpenChange={setShowRouteDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Change Route</DialogTitle>
           </DialogHeader>
