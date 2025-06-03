@@ -144,6 +144,26 @@ export default function AuthPage() {
     setCurrentStep("signup");
   };
 
+  const handleDemoLogin = (role: string) => {
+    const mockAccounts = {
+      passenger: { phone: "0245678901", pin: "1234" },
+      mate: { phone: "0234567890", pin: "1234" },
+      driver: { phone: "0223456789", pin: "1234" },
+      owner: { phone: "0212345678", pin: "1234" },
+    };
+
+    const account = mockAccounts[role as keyof typeof mockAccounts];
+    if (account) {
+      setPhone(account.phone);
+      setPin(account.pin);
+      setSelectedRole(role);
+      setUserRole(role);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('hasSignedUp', 'true');
+      setCurrentStep("signin");
+    }
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -214,6 +234,31 @@ export default function AuthPage() {
                   </Card>
                 );
               })}
+            </div>
+
+            {/* Demo Mode Section */}
+            <div className="border-t pt-6 mb-6">
+              <h3 className="text-sm font-medium text-center mb-4 text-muted-foreground">Quick Demo Access</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {roles.map((role) => {
+                  const Icon = role.icon;
+                  return (
+                    <Button
+                      key={`demo-${role.id}`}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDemoLogin(role.id)}
+                      className="flex items-center space-x-2 h-auto py-2"
+                    >
+                      <Icon className={`h-4 w-4 ${role.color}`} />
+                      <span className="text-xs">{role.title}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Demo accounts with pre-filled credentials
+              </p>
             </div>
 
             <div className="text-center">
