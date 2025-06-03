@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Edit, MapPin, Plus, Minus, Save } from "lucide-react";
+import { ArrowLeft, Edit, MapPin, Plus, Minus, Save, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth";
@@ -109,6 +109,22 @@ export default function FareManagement({ onBack }: FareManagementProps) {
         routeId: currentRoute.id,
         stops: tempStops
       });
+    }
+  };
+
+  const moveStopUp = (index: number) => {
+    if (index > 0) {
+      const newStops = [...tempStops];
+      [newStops[index], newStops[index - 1]] = [newStops[index - 1], newStops[index]];
+      setTempStops(newStops);
+    }
+  };
+
+  const moveStopDown = (index: number) => {
+    if (index < tempStops.length - 1) {
+      const newStops = [...tempStops];
+      [newStops[index], newStops[index + 1]] = [newStops[index + 1], newStops[index]];
+      setTempStops(newStops);
     }
   };
 
@@ -344,15 +360,38 @@ export default function FareManagement({ onBack }: FareManagementProps) {
                         </span>
                         <span className="text-sm">{stop}</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteStop(stop)}
-                        disabled={tempStops.length <= 2}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center space-x-1">
+                        {/* Move Up Button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveStopUp(index)}
+                          disabled={index === 0}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        {/* Move Down Button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveStopDown(index)}
+                          disabled={index === tempStops.length - 1}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        {/* Delete Button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteStop(stop)}
+                          disabled={tempStops.length <= 2}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
