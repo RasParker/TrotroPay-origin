@@ -187,13 +187,31 @@ export default function OwnerDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <Button variant="outline" className="h-20">
+          <Button 
+            variant="outline" 
+            className="h-20"
+            onClick={() => {
+              toast({
+                title: "Add Vehicle",
+                description: "Vehicle registration feature coming soon!",
+              });
+            }}
+          >
             <div className="text-center">
               <Plus className="h-6 w-6 mx-auto mb-2 text-purple-600" />
               <span className="text-sm font-medium">Add Vehicle</span>
             </div>
           </Button>
-          <Button variant="outline" className="h-20">
+          <Button 
+            variant="outline" 
+            className="h-20"
+            onClick={() => {
+              toast({
+                title: "Manage Staff",
+                description: "Staff management feature coming soon!",
+              });
+            }}
+          >
             <div className="text-center">
               <Users className="h-6 w-6 mx-auto mb-2 text-purple-600" />
               <span className="text-sm font-medium">Manage Staff</span>
@@ -205,25 +223,57 @@ export default function OwnerDashboard() {
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-border bottom-nav-safe">
         <div className="flex">
-          <Button variant="ghost" className="flex-1 py-3 text-purple-600">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-purple-600"
+            onClick={() => {
+              // Already on dashboard, just show feedback
+              toast({
+                title: "Dashboard",
+                description: "You're already on the dashboard",
+              });
+            }}
+          >
             <div className="text-center">
               <Building2 className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Dashboard</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => {
+              toast({
+                title: "Vehicles",
+                description: "Vehicle management page coming soon!",
+              });
+            }}
+          >
             <div className="text-center">
               <Car className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Vehicles</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => {
+              toast({
+                title: "Reports",
+                description: "Financial reports page coming soon!",
+              });
+            }}
+          >
             <div className="text-center">
               <BarChart3 className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Reports</span>
             </div>
           </Button>
-          <Button variant="ghost" className="flex-1 py-3 text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/settings")}
+          >
             <div className="text-center">
               <Settings className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Settings</span>
