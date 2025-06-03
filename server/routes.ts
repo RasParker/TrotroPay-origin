@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import QRCode from "qrcode";
 import { storage } from "./storage";
 import { insertTransactionSchema, type User } from "@shared/schema";
 import { z } from "zod";
@@ -278,7 +279,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate QR code for vehicle
   app.get("/api/qr-code/:vehicleId", async (req, res) => {
     try {
-      const QRCode = require('qrcode');
       const vehicleId = req.params.vehicleId;
       
       // Generate QR code data URL
