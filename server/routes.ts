@@ -194,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const { vehicleId, destination, amount } = paymentSchema.parse(req.body);
+      const { vehicleId, destination, amount, passengerCount = 1 } = req.body;
       
       // Get passenger
       const passenger = await storage.getUser(req.session.userId);
@@ -234,12 +234,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBalance = (currentBalance - paymentAmount).toFixed(2);
       await storage.updateUserBalance(passenger.id, newBalance);
 
-      // Broadcast payment notification to vehicle crew
+      // Calculate individual fare for display
+      const individualFare = (paymentAmount / passengerCount).toFixed(2);
+
+      // Broadcast payment notification to vehicle crew with group info
       const paymentNotification = {
         type: "payment_received",
         transaction: {
           ...transaction,
           passengerPhone: passenger.phone.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2'),
+          passengerCount,
+          individualFare,
+          isGroupPayment: passengerCount > 1,
         },
       };
 
@@ -247,7 +253,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         message: "Payment successful",
-        transaction,
+        transaction: {
+          ...transaction,
+          passengerCount,
+          individualFare,
+          isGroupPayment: passengerCount > 1,
+        },
         newBalance 
       });
     } catch (error) {

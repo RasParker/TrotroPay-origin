@@ -289,12 +289,12 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
         >
           {paymentMutation.isPending 
             ? "Processing..." 
-            : `Pay ${formatAmount(fareAmount)}`
+            : `Pay ${formatAmount(totalAmount)}${passengerCount > 1 ? ` (${passengerCount} passengers)` : ''}`
           }
         </Button>
 
         {/* Balance Warning */}
-        {user && parseFloat(user.momoBalance) < parseFloat(fareAmount) && (
+        {user && parseFloat(user.momoBalance) < parseFloat(totalAmount) && (
           <Card className="mt-4 border-warning">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -319,9 +319,23 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
               Payment Successful!
             </h3>
             <p className="text-muted-foreground mb-6">
-              Your fare of <span className="font-medium text-success">
-                {formatAmount(fareAmount)}
-              </span> has been paid successfully to {vehicle.vehicleId}.
+              {passengerCount === 1 ? (
+                <>
+                  Your fare of <span className="font-medium text-success">
+                    {formatAmount(totalAmount)}
+                  </span> has been paid successfully to {vehicle.vehicleId}.
+                </>
+              ) : (
+                <>
+                  Group payment of <span className="font-medium text-success">
+                    {formatAmount(totalAmount)}
+                  </span> for {passengerCount} passengers has been paid successfully to {vehicle.vehicleId}.
+                  <br />
+                  <span className="text-xs text-muted-foreground">
+                    ({formatAmount(fareAmount)} per passenger)
+                  </span>
+                </>
+              )}
             </p>
             <Button onClick={handleSuccessClose} className="w-full">
               Continue
