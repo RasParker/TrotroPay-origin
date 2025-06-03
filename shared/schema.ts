@@ -19,6 +19,8 @@ export const vehicles = pgTable("vehicles", {
   ownerId: integer("owner_id").references(() => users.id),
   driverId: integer("driver_id").references(() => users.id),
   mateId: integer("mate_id").references(() => users.id),
+  maxCapacity: integer("max_capacity").default(16), // Standard trotro capacity
+  currentPassengers: integer("current_passengers").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
