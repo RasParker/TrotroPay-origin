@@ -150,7 +150,7 @@ export default function FareManagement({ onBack }: FareManagementProps) {
                   disabled={updateFaresMutation.isPending}
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
-                  Update Fares
+                  Update Fares (₵)
                 </Button>
               </div>
             </CardContent>
