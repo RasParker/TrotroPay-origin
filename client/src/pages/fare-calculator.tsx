@@ -194,15 +194,6 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
           </CardContent>
         </Card>
 
-        {/* Debug Display */}
-        {fareResult && (
-          <Card className="mb-4 bg-yellow-50">
-            <CardContent className="p-2">
-              <pre className="text-xs">{JSON.stringify(fareResult, null, 2)}</pre>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Fare Result */}
         {fareResult && (
           <Card className="mb-4">
