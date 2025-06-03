@@ -289,36 +289,34 @@ export default function PassengerDashboard() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
-        <div className="flex justify-center items-center px-2 py-3 max-w-md mx-auto">
-          <div className="flex justify-around w-full">
-            <button className="flex flex-col items-center justify-center py-2 px-4 rounded-xl bg-blue-50 active:scale-95 transition-transform">
-              <div className="bg-blue-500 p-2 rounded-full mb-1">
-                <Home className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-xs font-medium text-blue-600">Home</span>
-            </button>
-            
-            <button 
-              onClick={() => setLocation("/history")}
-              className="flex flex-col items-center justify-center py-2 px-4 rounded-xl active:scale-95 transition-transform"
-            >
-              <div className="bg-gray-100 p-2 rounded-full mb-1">
-                <History className="h-4 w-4 text-gray-600" />
-              </div>
-              <span className="text-xs font-medium text-gray-600">History</span>
-            </button>
-            
-            <button 
-              onClick={() => setLocation("/profile")}
-              className="flex flex-col items-center justify-center py-2 px-4 rounded-xl active:scale-95 transition-transform"
-            >
-              <div className="bg-gray-100 p-2 rounded-full mb-1">
-                <User className="h-4 w-4 text-gray-600" />
-              </div>
-              <span className="text-xs font-medium text-gray-600">Profile</span>
-            </button>
-          </div>
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 shadow-lg">
+        <div className="grid grid-cols-3 gap-0">
+          <button className="flex flex-col items-center py-3 bg-blue-50 active:bg-blue-100">
+            <div className="bg-blue-500 p-1.5 rounded-full mb-1">
+              <Home className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-xs font-medium text-blue-600">Home</span>
+          </button>
+          
+          <button 
+            onClick={() => setLocation("/history")}
+            className="flex flex-col items-center py-3 active:bg-gray-100"
+          >
+            <div className="bg-gray-200 p-1.5 rounded-full mb-1">
+              <History className="h-4 w-4 text-gray-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-600">History</span>
+          </button>
+          
+          <button 
+            onClick={() => setLocation("/profile")}
+            className="flex flex-col items-center py-3 active:bg-gray-100"
+          >
+            <div className="bg-gray-200 p-1.5 rounded-full mb-1">
+              <User className="h-4 w-4 text-gray-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-600">Profile</span>
+          </button>
         </div>
       </div>
 
