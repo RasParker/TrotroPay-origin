@@ -1,0 +1,159 @@
+Review: Passenger Dashboard (Passenger-dashboard.tsx)
+Overall, the code looks well-structured and follows modern React/Next.js conventions with useState, @tanstack/react-query, and custom hooks. The UI components (Card, Button, Badge, Dialog) seem to be from a library like Shadcn UI, which is a good choice for consistent design.
+Here's a breakdown of feedback and potential improvements:
+1. Code Structure and Best Practices
+useQuery Key: The queryKey: [\/api/dashboard/passenger/${user?.id}`]` is good. Ensure your backend endpoint truly supports fetching dashboard data for a passenger by their ID.
+Data Structure: The assumed structure for dashboardData (user.name, user.momoBalance, recentTransactions, transaction.route, transaction.destination, transaction.amount, transaction.createdAt) seems logical and aligns with the expected data for a passenger dashboard.
+Error Handling (Loading State): The loading spinner is a good start. Consider adding a basic error state display if isLoading is false but dashboardData is null/undefined due to an API error.
+window.location.hash for Navigation: While functional for a quick prototype, relying on window.location.hash for navigation is generally not the best practice for robust single-page applications.
+Recommendation: For a production app, you'd typically use a dedicated routing library like React Router (for plain React) or Next.js's useRouter hook (router.push('/payment/${vehicleId}')). This provides better control, history management, and often integrates better with state management.
+For this MVP, it's acceptable, but keep it in mind for future iterations.
+useAuth and apiRequest: Good to see these custom hooks/utilities for authentication and API calls, indicating a structured approach.
+2. User Experience (UX) and Design
+Header (gradient-primary): The header with "Hello, {Name}" and "Ready for your journey?" along with notification and logout buttons is clean and effective.
+MoMo Balance Card (gradient-accent): This is a critical element, prominently displaying the balance. The "Top Up" button is essential.
+Improvement: When the user clicks "Top Up," what happens? Does it open a dialog to enter an amount, or does it redirect to a MoMo top-up specific flow? Clearly defining this interaction is the next step.
+Quick Actions (Scan QR / Enter ID): These are clear, prominent, and use appropriate icons. The h-20 and text-center with icons make them visually appealing as touch targets.
+Recent Trips:
+Visual Clarity: The "Paid" badge and the green dot are good visual cues for successful transactions.
+Date/Time Formatting: formatDate and formatTime are well-implemented, making the history digestible (Today, Yesterday).
+"No trips yet" state: This provides good guidance for new users.
+Bottom Navigation:
+Clarity: Icons and text labels are present, which is good.
+Functionality: Currently, only "Home" seems active. You'll need to link "History" and "Profile" to their respective screens.
+"bottom-nav-safe": Good consideration for safe areas on mobile devices.
+3. Missing Functionality / Next Steps (Based on our UX Design)
+"Top Up" Flow: This is crucial. When a user clicks "Top Up," they should be able to:
+Enter an amount.
+Select their MoMo provider (if multiple are supported by the backend).
+Initiate the MoMo payment (which would likely involve the backend sending a USSD prompt or similar).
+Payment Flow (#payment/:vehicleId): This is the immediate next screen after scanning/manual entry. This component will need:
+Fetching vehicle details (route, perhaps mate/driver info).
+A list of common destinations/stops for that route.
+Logic to calculate/display the fare based on the selected destination.
+The actual MoMo payment initiation.
+History Screen: A dedicated screen to view all past trips, with potential filtering/sorting options.
+Profile Screen: To view/edit user details, manage MoMo numbers (if applicable), and potentially see account settings.
+Notifications: The bell icon is present, but the notification system itself needs to be implemented (fetching notifications, displaying them).
+Review: Mate Dashboard (mate-dashboard.tsx)
+This dashboard is well-designed for a mate's primary needs.
+1. Code Structure and Best Practices
+Real-time Updates (useRealtimeUpdates & useEffect): This is a crucial and well-implemented feature for the mate. The toast notification and refetch() on payment_received are exactly what's needed for immediate feedback.
+refetchInterval: Setting a refetchInterval on the useQuery (e.g., 30 seconds) provides a good fallback for data freshness, especially if real-time updates face occasional issues.
+formatAmount and formatTime: Consistent and helpful utility functions.
+Loading State: Clear loading indicator.
+2. User Experience (UX) and Design
+Header (bg-success): Distinctive color choice, good for a mate's "active" status. Displaying the current route is practical.
+Vehicle Info Card: Clearly shows the active route and Trotro ID, which is essential context for the mate.
+QR Code Display:
+Mock QR Code: This is the most critical visual element for the mate. Replit has implemented a mock QR code.
+Improvement: This mock QR code must be replaced with a dynamically generated QR code that encodes the vehicleId (and possibly mateId). The backend will need an endpoint to provide this QR code data (e.g., a URL for an image, or the raw data string). The frontend then renders this using a QR code library.
+Today's Performance: "Today's Collection" and "Total Passengers" are key metrics for the mate, displayed prominently.
+Live Payments Feed:
+Real-time Indication: The "Live" pulse is a nice touch.
+New Payment Highlight: The animate-slide-in and conditional styling (border-success bg-green-50) for isNew payments are excellent for drawing attention to new transactions.
+Display Details: Showing "Passenger Payment", "destination", "amount", and "time" is sufficient for quick glance.
+Bottom Navigation: Icons and labels are good. "Dashboard" is active. The "QR Code" and "Earnings" buttons need to be linked to their respective views/components.
+3. Missing Functionality / Next Steps
+QR Code Generation: Implement logic to fetch and display the actual QR code from the backend. This is paramount.
+Route Change Functionality: The dashboard shows dashboardData?.vehicle?.route || "No route assigned". How does the mate change their route if it's incorrect or they start a new one? This needs a button/dialog or a dedicated "Route Management" screen accessible from the mate dashboard (perhaps under "Settings" in the bottom nav or a new card).
+Settings/Profile: The bottom nav has "User" (Profile) and "Bell" (Notifications). These need corresponding screens.
+Earning Details: The "Earnings" page (which you've also provided!) is the next logical step from here.
+Review: Driver Dashboard (driver-dashboard.tsx)
+The Driver Dashboard provides a great overview of the vehicle's performance and the driver's share.
+1. Code Structure and Best Practices
+Data Fetching (useQuery): Standard and effective.
+formatAmount: Consistent with other components.
+Mock weekDays data: This is clearly placeholder data. It needs to be replaced with actual data fetched from the backend that reflects the vehicle's performance over the week.
+2. User Experience (UX) and Design
+Header (gradient-accent): Different color than mate, helping distinguish user types. Displays vehicle ID, which is relevant for the driver.
+Vehicle Info Card: Reinforces the vehicle they are driving and its route.
+Today's Performance: "Gross Earnings" and "Your Share" are the key metrics for the driver, clearly presented. The 15% commission is hardcoded; this should ideally come from the backend.
+Current Route: This section is present, but similar to the mate, there's no "Change Route" functionality visible on the main dashboard even though there's a placeholder button.
+Current Mate: This section is excellent for a driver to see who is currently assigned and how much they've collected, addressing a key pain point for owners and drivers. The calculation (parseFloat(dashboardData.grossEarnings || "0") * 0.1).toFixed(2) for Mate commission suggests that the Mate's commission is also fixed at 10% and calculated client-side; this should ideally be configurable from the backend via the Car Owner's settings.
+Weekly Summary: The weekDays data is good for the layout, but as noted, it needs to be dynamic. This gives the driver a quick glance at weekly trends.
+3. Missing Functionality / Next Steps
+Dynamic Weekly Data: Replace weekDays mock data with actual data from the backend.
+Route Management: Implement a way for the driver to change/set their active route. This might be a dialog or a separate screen.
+Settings/Profile: Bottom navigation has "Settings," which needs to be developed.
+Performance Page: The "Performance" button in the bottom nav needs to link to the driver-performance.tsx component you've provided.
+Review: Driver Performance (driver-performance.tsx)
+This component provides excellent analytical insights for the driver.
+1. Code Structure and Best Practices
+Data Fetching: Still uses api/dashboard/driver/${user?.id}. Ideally, performance data might be fetched from a more specific endpoint (e.g., /api/performance/driver/${user?.id}).
+weeklyData: Again, this is mock data and needs to be replaced with real data from the backend.
+Calculations: totalWeeklyEarnings, totalTrips, totalHours, avgEarningsPerTrip, avgEarningsPerHour are good client-side calculations, but they rely on the weeklyData coming from the backend.
+onBack Prop: Good pattern for navigating back to the dashboard.
+2. User Experience (UX) and Design
+Header: Clear title and "Your driving statistics" subtitle. Back button works well.
+Key Metrics: "Today's Earnings" and "Your Share" are repeated from the dashboard, which is fine for quick visibility.
+Performance Stats (Avg/Trip, Avg/Hour, Total Trips): These are great, actionable insights for a driver.
+Weekly Performance Chart (Visual): The bar chart using div elements and width styling based on percentage is a clever way to visualize performance without a full charting library. It's clear and effective.
+Performance Insights:
+Hardcoded Insights: "Best Performance," "Peak Hours," and "Weekly Goal" are currently hardcoded insights. These must be dynamic and generated by the backend based on actual performance data. For example, the backend would analyze weeklyData to find the best day, calculate peak hours, and compare current earnings to a set goal.
+Recommendation: These insights provide immense value. Make sure the backend logic supports generating them dynamically.
+Commission Breakdown: Useful transparency for the driver on their commission structure and payout schedule.
+3. Missing Functionality / Next Steps
+Dynamic Performance Data: Backend needs to provide comprehensive weekly/monthly performance data for calculations and insights.
+Dynamic Insights: Backend logic to analyze performance data and generate "Best Performance," "Peak Hours," and "Weekly Goal" insights.
+Settings for Goals: Allow the driver (or potentially owner) to set weekly/monthly earning goals that the app can track against.
+Review: Mate Earnings (earnings.tsx)
+This component provides a detailed earnings breakdown for the mate.
+1. Code Structure and Best Practices
+Data Fetching (useQuery): Standard.
+weeklyData: Mock data again. Needs to be dynamic.
+commission Calculation: parseFloat(dashboardData?.todayEarnings || "0") * 0.10 is again a client-side calculation based on a fixed 10% commission. This should ideally be driven by settings from the Car Owner/Backend.
+2. User Experience (UX) and Design
+Header (bg-success): Consistent with mate's primary color.
+Today's Summary: "Today's Collection" and "Your Commission" are clear.
+Weekly Performance: Similar to the driver's, this provides a daily breakdown of collections and trips.
+"Missing a piece of code": The earnings.tsx code provided was truncated at the end of the Weekly Total section. We'll need to assume the rest of the component is for displaying earnings history or further details.
+3. Missing Functionality / Next Steps
+Dynamic Earnings Data: Replace mock weeklyData with actual data from the backend.
+Payout Request/History: A crucial feature for mates would be to request a payout of their accumulated commission and view a history of these payouts. This directly addresses the "change" pain point by allowing them to convert digital earnings into liquid cash when needed.
+Commission Structure: Ensure the commission rate is fetched from the backend, potentially configurable by the owner.
+
+Mate Dashboard (mate-dashboard.tsx) Specifics:
+Dynamic QR Code Generation & Display:
+Replace the mock QR code div with a component that renders an actual QR code.
+Assume a prop like qrCodeData: string will be passed, which is the URL or string that the QR code image library will convert into a QR code.
+This qrCodeData should contain the vehicleId and mateId for payment processing.
+Route Management (UI Integration):
+Add a prominent button (e.g., "Change Route" or "Manage Route") on the Mate Dashboard.
+Clicking this button should open a new dialog or navigate to a dedicated screen (/mate/route-management) where the mate can select their current route from a list of predefined routes.
+Upon selection, send an API request to the backend to update the mate's active route for their assigned vehicle.
+Bottom Navigation Links: Ensure "QR Code" and "Earnings" buttons in the bottom navigation correctly navigate to their respective screens (QR Code can be a dedicated screen if needed, or simply scroll to the QR section on the dashboard, and "Earnings" links to the Earnings.tsx component).
+3. Driver Dashboard (driver-dashboard.tsx) Specifics:
+Dynamic Commission Display: Ensure "Your Share" (15%) and "Mate Commission" (10%) percentages are fetched dynamically from the backend, as they might be configurable by the Car Owner. Update calculation to use this dynamic percentage.
+Route Management (UI Integration): Similar to the Mate, add a "Change Route" button that enables the driver to update the vehicle's current route via an API call, potentially opening a dialog or navigating to a dedicated screen.
+Bottom Navigation Links: Ensure "Performance" button correctly navigates to the DriverPerformance.tsx component.
+4. Driver Performance (driver-performance.tsx) Specifics:
+Dynamic Performance Insights:
+Modify the "Performance Insights" section (Best Performance, Peak Hours, Weekly Goal) to display data dynamically derived from the weeklyData (or similar performance metrics from the backend).
+For example, "Best Performance" should programmatically identify the day with highest earnings from weeklyData.
+"Peak Hours" could be a simple mock insight for now, but in a full implementation, it would come from backend analytics.
+"Weekly Goal" should ideally be fetched from driver/owner settings and tracked dynamically.
+Interactive Chart (Optional but Recommended): If possible with Shadcn UI or a lightweight charting library, consider making the weekly performance bar chart more visually engaging (e.g., using a proper bar chart component instead of divs, even if simple).
+5. Mate Earnings (earnings.tsx) Specifics:
+Payout Request Feature:
+Add a prominent "Request Payout" button.
+Clicking it should open a dialog where the mate can:
+View their current available commission balance.
+Enter the amount they wish to withdraw.
+Confirm the payout.
+This action should trigger an API call to the backend to process the payout from the mate's accumulated commission to their linked MoMo account.
+Implement clear success/failure messages for payout requests.
+Payout History: Add a section or link to a dedicated screen showing a history of all requested payouts (amount, date, status).
+Dynamic Commission Display: Similar to the driver, ensure the 10% mate commission is fetched dynamically from the backend.
+6. Backend Assumptions (for Replit to simulate):
+New/Updated API Endpoints:
+/api/trotro/qr-code/:vehicleId/:mateId: Returns data for QR code generation.
+/api/vehicle/:vehicleId/route: PUT endpoint to update a vehicle's current route.
+/api/mate/:mateId/payout: POST endpoint to request a mate payout.
+/api/mate/:mateId/payout-history: GET endpoint for mate payout history.
+Updated dashboard APIs to return dynamic weeklyData, performanceInsights, and configurable commissionRates.
+Data Models: Updated backend models to store daily/weekly earnings, route history, performance metrics, and commission structures.
+
+Replit Task: Please implement the refinements and new features described above within the provided mate-dashboard.tsx, driver-dashboard.tsx, driver-performance.tsx, and earnings.tsx components. Focus on integrating dynamic data, enabling the new functionalities, and making necessary UI/UX adjustments. Pay special attention to the QR code generation/display for the Mate and the payout request/history for the Mate's earnings page.
+
+

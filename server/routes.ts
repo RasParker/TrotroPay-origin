@@ -275,6 +275,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate QR code for vehicle
+  app.get("/api/qr-code/:vehicleId", async (req, res) => {
+    try {
+      const QRCode = require('qrcode');
+      const vehicleId = req.params.vehicleId;
+      
+      // Generate QR code data URL
+      const qrData = `trotropay://payment/${vehicleId}`;
+      const qrCodeUrl = await QRCode.toDataURL(qrData, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      
+      res.json({ qrCodeUrl, vehicleId });
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      res.status(500).json({ error: "Failed to generate QR code" });
+    }
+  });
+
   app.get("/api/dashboard/mate/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
@@ -305,12 +329,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const todayTransactions = await storage.getTodaysTransactionsByVehicleId(vehicle.id);
       const totalEarnings = todayTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
+      // Generate weekly data (last 7 days) from actual transactions
+      const allTransactions = await storage.getTransactionsByVehicleId(vehicle.id);
+      const weeklyData = [];
+      const today = new Date();
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const dayTransactions = allTransactions.filter(t => 
+          t.createdAt && t.createdAt.toISOString().split('T')[0] === dateStr
+        );
+        
+        const dayEarnings = dayTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+        weeklyData.push({
+          day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+          date: dateStr,
+          earnings: dayEarnings.toFixed(2),
+          trips: dayTransactions.length,
+          commission: (dayEarnings * 0.10).toFixed(2)
+        });
+      }
+
       res.json({
         user: { ...user, pin: undefined },
         vehicle,
         todayEarnings: totalEarnings.toFixed(2),
         passengerCount: todayTransactions.length,
         recentPayments: todayTransactions.slice(-10).reverse(),
+        weeklyData
       });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

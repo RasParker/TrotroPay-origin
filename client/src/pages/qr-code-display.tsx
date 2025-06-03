@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, QrCode, Download, Share2 } from "lucide-react";
+import { ArrowLeft, QrCode, Download, Share2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,6 +13,25 @@ interface QRCodeDisplayProps {
 export default function QRCodeDisplay({ onBack }: QRCodeDisplayProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [vehicleId, setVehicleId] = useState<string>("");
+
+  // Get user's vehicle info first
+  const { data: dashboardData } = useQuery({
+    queryKey: [`/api/dashboard/mate/${user?.id}`],
+    enabled: !!user?.id && user.role === "mate",
+  });
+
+  // Get QR code once we have vehicle ID
+  const { data: qrData, isLoading, refetch } = useQuery({
+    queryKey: [`/api/qr-code/${vehicleId}`],
+    enabled: !!vehicleId,
+  });
+
+  useEffect(() => {
+    if (dashboardData?.vehicle?.vehicleId) {
+      setVehicleId(dashboardData.vehicle.vehicleId);
+    }
+  }, [dashboardData]);
 
   const handleShare = () => {
     if (navigator.share) {
