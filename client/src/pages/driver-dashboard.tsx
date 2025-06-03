@@ -284,9 +284,9 @@ export default function DriverDashboard() {
 
       {/* Route Selection Dialog */}
       <Dialog open={showRouteDialog} onOpenChange={setShowRouteDialog}>
-        <DialogContent className="!w-[90vw] !max-w-sm !mx-auto sm:!max-w-md">
+        <DialogContent className="!w-[80vw] !max-w-xs !mx-auto !p-4 sm:!max-w-sm">
           <DialogHeader>
-            <DialogTitle>Change Route</DialogTitle>
+            <DialogTitle className="text-lg">Change Route</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
