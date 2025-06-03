@@ -389,14 +389,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Route not found" });
       }
 
-      // Verify the driver is assigned to a vehicle on this route
-      const driverVehicle = await storage.getVehiclesByOwnerId(0); // Get all vehicles first
-      const allVehicles = await Promise.all([
-        ...driverVehicle,
-        ...(await storage.getVehiclesByOwnerId(1)), // Add other owners if needed
-      ]);
+      // Get all users to find all vehicle owners
+      const allUsers = await storage.getAllUsers();
+      const owners = allUsers.filter(u => u.role === "owner");
+      
+      // Get all vehicles from all owners
+      let allVehicles: any[] = [];
+      for (const owner of owners) {
+        const ownerVehicles = await storage.getVehiclesByOwnerId(owner.id);
+        allVehicles = [...allVehicles, ...ownerVehicles];
+      }
+      
+      // Find the driver's vehicle on this route
+      console.log("Driver ID:", user.id);
+      console.log("Route name:", route.name);
+      console.log("All vehicles:", allVehicles.map(v => ({ id: v.id, driverId: v.driverId, route: v.route })));
       
       const userVehicle = allVehicles.find(v => v.driverId === user.id && v.route === route.name);
+      console.log("Found user vehicle:", userVehicle);
+      
       if (!userVehicle) {
         return res.status(403).json({ message: "You are not assigned to a vehicle on this route" });
       }
