@@ -18,21 +18,29 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const queryClient = useQueryClient();
 
-  const { data: authData, isLoading } = useQuery({
+  const { data: authData, isLoading: queryLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    if (authData?.user) {
-      setUser(authData.user);
+    setAuthLoading(queryLoading);
+    
+    if (authData) {
+      const userData = (authData as any)?.user;
+      if (userData) {
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
     } else if (authData === null) {
       setUser(null);
     }
-  }, [authData]);
+  }, [authData, queryLoading]);
 
   const loginMutation = useMutation({
     mutationFn: async ({ phone, pin }: { phone: string; pin: string }) => {
@@ -45,6 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     onSuccess: (data) => {
       setUser(data.user);
+      queryClient.setQueryData(["/api/auth/me"], data);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });
@@ -68,7 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading: authLoading }}>
       {children}
     </AuthContext.Provider>
   );
