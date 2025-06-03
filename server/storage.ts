@@ -106,27 +106,6 @@ export class DatabaseStorage implements IStorage {
     return vehicle || undefined;
   }
 
-  async updateVehicleCapacity(vehicleId: number, passengerChange: number) {
-    const vehicle = await this.getVehicle(vehicleId);
-    if (!vehicle) throw new Error("Vehicle not found");
-
-    const newCount = Math.max(0, (vehicle.currentPassengers || 0) + passengerChange);
-    const maxCapacity = vehicle.maxCapacity || 16;
-
-    const [updated] = await db
-      .update(vehicles)
-      .set({ currentPassengers: Math.min(newCount, maxCapacity) })
-      .where(eq(vehicles.id, vehicleId))
-      .returning();
-
-    return {
-      vehicle: updated,
-      capacityPercentage: Math.round((updated.currentPassengers / maxCapacity) * 100),
-      isFull: updated.currentPassengers >= maxCapacity,
-      isNearlyFull: updated.currentPassengers >= (maxCapacity * 0.8)
-    };
-  }
-
   async getRoute(id: number): Promise<Route | undefined> {
     const [route] = await db.select().from(routes).where(eq(routes.id, id));
     return route || undefined;

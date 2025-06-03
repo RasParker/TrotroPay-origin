@@ -11,8 +11,7 @@ import {
   LogOut, 
   Activity,
   DollarSign,
-  User,
-  Plus
+  User
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRealtimeUpdates } from "@/hooks/use-websocket";
@@ -31,7 +30,7 @@ export default function MateDashboard() {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
-  // Handle real-time notifications
+  // Handle real-time payment notifications
   useEffect(() => {
     if (lastMessage?.type === "payment_received") {
       toast({
@@ -39,21 +38,6 @@ export default function MateDashboard() {
         description: `GH₵ ${lastMessage.transaction.amount} from ${lastMessage.transaction.passengerPhone}`,
       });
       refetch(); // Refresh dashboard data
-    } else if (lastMessage?.type === "vehicle_full") {
-      toast({
-        title: "🚫 Vehicle Full!",
-        description: lastMessage.message,
-        variant: "destructive",
-      });
-    } else if (lastMessage?.type === "vehicle_nearly_full") {
-      toast({
-        title: "⚠️ Nearly Full",
-        description: lastMessage.message,
-        className: "border-orange-500 text-orange-900",
-      });
-    } else if (lastMessage?.type === "capacity_update") {
-      // Optionally refresh data or update UI directly
-      refetch();
     }
   }, [lastMessage, toast, refetch]);
 
@@ -132,88 +116,6 @@ export default function MateDashboard() {
         )}
 
         
-
-        {/* Passenger Capacity */}
-        {dashboardData?.vehicle && (
-          <Card className="mb-4">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-medium text-foreground">Passenger Capacity</h3>
-                <Badge 
-                  variant={
-                    (dashboardData.vehicle.currentPassengers || 0) >= (dashboardData.vehicle.maxCapacity || 16) 
-                      ? "destructive" 
-                      : (dashboardData.vehicle.currentPassengers || 0) >= ((dashboardData.vehicle.maxCapacity || 16) * 0.8)
-                        ? "secondary"
-                        : "default"
-                  }
-                >
-                  {Math.round(((dashboardData.vehicle.currentPassengers || 0) / (dashboardData.vehicle.maxCapacity || 16)) * 100)}%
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl font-bold text-foreground">
-                  {dashboardData.vehicle.currentPassengers || 0}
-                </span>
-                <span className="text-muted-foreground">
-                  / {dashboardData.vehicle.maxCapacity || 16} seats
-                </span>
-              </div>
-              
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    (dashboardData.vehicle.currentPassengers || 0) >= (dashboardData.vehicle.maxCapacity || 16)
-                      ? "bg-red-500"
-                      : (dashboardData.vehicle.currentPassengers || 0) >= ((dashboardData.vehicle.maxCapacity || 16) * 0.8)
-                        ? "bg-orange-500"
-                        : "bg-green-500"
-                  }`}
-                  style={{ 
-                    width: `${Math.min(((dashboardData.vehicle.currentPassengers || 0) / (dashboardData.vehicle.maxCapacity || 16)) * 100, 100)}%` 
-                  }}
-                ></div>
-              </div>
-              
-              <div className="flex justify-between mt-3 space-x-2">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => {
-                    // This would typically be called automatically when passengers board
-                    fetch(`/api/vehicles/${dashboardData.vehicle.id}/board`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ passengerCount: 1 })
-                    }).then(() => refetch());
-                  }}
-                  disabled={(dashboardData.vehicle.currentPassengers || 0) >= (dashboardData.vehicle.maxCapacity || 16)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Board
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => {
-                    fetch(`/api/vehicles/${dashboardData.vehicle.id}/alight`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ passengerCount: 1 })
-                    }).then(() => refetch());
-                  }}
-                  disabled={(dashboardData.vehicle.currentPassengers || 0) <= 0}
-                >
-                  <Users className="h-4 w-4 mr-1" />
-                  Alight
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Today's Performance */}
         <div className="grid grid-cols-2 gap-4 mb-6">
