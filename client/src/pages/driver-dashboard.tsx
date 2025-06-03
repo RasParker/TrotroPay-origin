@@ -281,6 +281,65 @@ export default function DriverDashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Route Selection Dialog */}
+      <Dialog open={showRouteDialog} onOpenChange={setShowRouteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Route</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Select a new route for your vehicle. This will update your assigned route immediately.
+            </p>
+            
+            <div className="space-y-2">
+              {routes?.map((route: any) => (
+                <Button
+                  key={route.id}
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4"
+                  onClick={() => {
+                    if (dashboardData?.vehicle?.vehicleId) {
+                      routeChangeMutation.mutate({
+                        vehicleId: dashboardData.vehicle.vehicleId,
+                        routeId: route.id
+                      });
+                    }
+                  }}
+                  disabled={routeChangeMutation.isPending}
+                >
+                  <div className="text-left">
+                    <div className="font-medium">{route.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {route.startLocation} → {route.endLocation}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Distance: {route.distance}km
+                    </div>
+                  </div>
+                </Button>
+              ))}
+            </div>
+
+            {routes?.length === 0 && (
+              <div className="text-center py-4 text-muted-foreground">
+                No routes available
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowRouteDialog(false)}
+                disabled={routeChangeMutation.isPending}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
