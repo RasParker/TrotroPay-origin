@@ -364,6 +364,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update route stops (for drivers)
+  app.put("/api/routes/:routeId/stops", async (req, res) => {
+    try {
+      const { routeId } = req.params;
+      const { stops } = req.body;
+
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.role !== "driver") {
+        return res.status(403).json({ message: "Only drivers can update stops" });
+      }
+
+      if (!stops || !Array.isArray(stops) || stops.length < 2) {
+        return res.status(400).json({ error: "At least 2 stops are required" });
+      }
+
+      // Get the route
+      const route = await storage.getRoute(parseInt(routeId));
+      if (!route) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      // Get all users to find all vehicle owners
+      const allUsers = await storage.getAllUsers();
+      const owners = allUsers.filter(u => u.role === "owner");
+      
+      // Get all vehicles from all owners
+      let allVehicles: any[] = [];
+      for (const owner of owners) {
+        const ownerVehicles = await storage.getVehiclesByOwnerId(owner.id);
+        allVehicles = [...allVehicles, ...ownerVehicles];
+      }
+      
+      // Find the driver's vehicle on this route
+      const userVehicle = allVehicles.find(v => v.driverId === user.id && v.route === route.name);
+      if (!userVehicle) {
+        return res.status(403).json({ message: "You are not assigned to a vehicle on this route" });
+      }
+
+      // Generate default fares for new stops (maintain cumulative pricing)
+      const newFares = stops.map((stop: string, index: number) => {
+        const baseFare = index * 1.50; // GH₵ 1.50 per stop distance
+        return `${stop}:${baseFare.toFixed(2)}`;
+      });
+
+      // Update the route's stops and regenerate fares
+      const updatedRoute = await storage.updateRoute(parseInt(routeId), { 
+        stops, 
+        fares: newFares 
+      });
+      
+      res.json({ 
+        message: "Stops updated successfully", 
+        route: updatedRoute 
+      });
+    } catch (error: any) {
+      console.error("Error updating stops:", error);
+      res.status(500).json({ error: "Failed to update stops" });
+    }
+  });
+
   // Update route fares (for drivers)
   app.put("/api/routes/:routeId/fares", async (req, res) => {
     try {

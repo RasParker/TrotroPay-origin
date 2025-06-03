@@ -19,6 +19,9 @@ export default function FareManagement({ onBack }: FareManagementProps) {
   const queryClient = useQueryClient();
   const [editingRoute, setEditingRoute] = useState<any>(null);
   const [fareInputs, setFareInputs] = useState<{ [stop: string]: string }>({});
+  const [editingStops, setEditingStops] = useState(false);
+  const [tempStops, setTempStops] = useState<string[]>([]);
+  const [newStopName, setNewStopName] = useState("");
 
   // Get driver's assigned route
   const { data: driverData } = useQuery({
@@ -51,6 +54,63 @@ export default function FareManagement({ onBack }: FareManagementProps) {
       });
     },
   });
+
+  const updateStopsMutation = useMutation({
+    mutationFn: async ({ routeId, stops }: { routeId: number; stops: string[] }) => {
+      return apiRequest('PUT', `/api/routes/${routeId}/stops`, { stops });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Stops Updated",
+        description: "Route stops have been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/routes'] });
+      setEditingStops(false);
+      setTempStops([]);
+      setNewStopName("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update fares",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Helper functions for stop management
+  const handleEditStops = (route: any) => {
+    setEditingStops(true);
+    setTempStops([...route.stops]);
+  };
+
+  const handleAddStop = () => {
+    if (newStopName.trim() && !tempStops.includes(newStopName.trim())) {
+      setTempStops([...tempStops, newStopName.trim()]);
+      setNewStopName("");
+    }
+  };
+
+  const handleDeleteStop = (stopToDelete: string) => {
+    if (tempStops.length > 2) { // Ensure at least 2 stops remain
+      setTempStops(tempStops.filter(stop => stop !== stopToDelete));
+    } else {
+      toast({
+        title: "Cannot Delete",
+        description: "Route must have at least 2 stops",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveStops = () => {
+    if (currentRoute && tempStops.length >= 2) {
+      updateStopsMutation.mutate({
+        routeId: currentRoute.id,
+        stops: tempStops
+      });
+    }
+  };
 
   const currentRoute = driverData?.vehicle?.route 
     ? routes?.find((r: any) => r.name === driverData.vehicle.route)
@@ -144,14 +204,25 @@ export default function FareManagement({ onBack }: FareManagementProps) {
                   })}
                 </div>
 
-                <Button 
-                  onClick={() => handleEditFares(currentRoute)}
-                  className="w-full mt-4"
-                  disabled={updateFaresMutation.isPending}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Update Fares (₵)
-                </Button>
+                <div className="flex space-x-2 mt-4">
+                  <Button 
+                    onClick={() => handleEditFares(currentRoute)}
+                    className="flex-1"
+                    disabled={updateFaresMutation.isPending || editingStops}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Update Fares (₵)
+                  </Button>
+                  <Button 
+                    onClick={() => handleEditStops(currentRoute)}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={updateStopsMutation.isPending || editingRoute}
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Manage Stops
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -236,6 +307,103 @@ export default function FareManagement({ onBack }: FareManagementProps) {
                       setFareInputs({});
                     }}
                     disabled={updateFaresMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Stop Management Interface */}
+        {editingStops && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <MapPin className="h-5 w-5" />
+                <span>Manage Route Stops</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-amber-50 p-3 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    <strong>Important:</strong> Coordinate with station masters and vehicle owners before making route changes. Route must have at least 2 stops.
+                  </p>
+                </div>
+
+                {/* Current Stops */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Current Stops:</Label>
+                  {tempStops.map((stop, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 border rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
+                          {index + 1}
+                        </span>
+                        <span className="text-sm">{stop}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteStop(stop)}
+                        disabled={tempStops.length <= 2}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add New Stop */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Add New Stop:</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      placeholder="Enter stop name..."
+                      value={newStopName}
+                      onChange={(e) => setNewStopName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddStop()}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleAddStop}
+                      disabled={!newStopName.trim() || tempStops.includes(newStopName.trim())}
+                      size="sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {newStopName.trim() && tempStops.includes(newStopName.trim()) && (
+                    <p className="text-xs text-red-600">Stop already exists</p>
+                  )}
+                </div>
+
+                <div className="flex space-x-2 pt-4">
+                  <Button 
+                    onClick={handleSaveStops}
+                    disabled={updateStopsMutation.isPending || tempStops.length < 2}
+                    className="flex-1"
+                  >
+                    {updateStopsMutation.isPending ? (
+                      <>Saving...</>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Stops
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setEditingStops(false);
+                      setTempStops([]);
+                      setNewStopName("");
+                    }}
+                    disabled={updateStopsMutation.isPending}
                   >
                     Cancel
                   </Button>
