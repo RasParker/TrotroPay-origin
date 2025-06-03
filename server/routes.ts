@@ -364,6 +364,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update route fares (for drivers)
+  app.put("/api/routes/:routeId/fares", async (req, res) => {
+    try {
+      const { routeId } = req.params;
+      const { fares } = req.body;
+
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.role !== "driver") {
+        return res.status(403).json({ message: "Only drivers can update fares" });
+      }
+
+      if (!fares || !Array.isArray(fares)) {
+        return res.status(400).json({ error: "Fares array is required" });
+      }
+
+      // Get the route
+      const route = await storage.getRoute(parseInt(routeId));
+      if (!route) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+
+      // Verify the driver is assigned to a vehicle on this route
+      const driverVehicle = await storage.getVehiclesByOwnerId(0); // Get all vehicles first
+      const allVehicles = await Promise.all([
+        ...driverVehicle,
+        ...(await storage.getVehiclesByOwnerId(1)), // Add other owners if needed
+      ]);
+      
+      const userVehicle = allVehicles.find(v => v.driverId === user.id && v.route === route.name);
+      if (!userVehicle) {
+        return res.status(403).json({ message: "You are not assigned to a vehicle on this route" });
+      }
+
+      // Update the route's fares
+      const updatedRoute = await storage.updateRoute(parseInt(routeId), { fares });
+      
+      res.json({ 
+        message: "Fares updated successfully", 
+        route: updatedRoute 
+      });
+    } catch (error: any) {
+      console.error("Error updating fares:", error);
+      res.status(500).json({ error: "Failed to update fares" });
+    }
+  });
+
   // Update vehicle route (for drivers)
   app.put("/api/vehicles/:vehicleId/route", async (req, res) => {
     try {

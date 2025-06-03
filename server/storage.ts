@@ -429,6 +429,16 @@ export class MemStorage implements IStorage {
     return route;
   }
 
+  async updateRoute(id: number, updates: Partial<Route>): Promise<Route | undefined> {
+    const route = this.routes.get(id);
+    if (route) {
+      const updated = { ...route, ...updates };
+      this.routes.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
   async getTransaction(id: number): Promise<Transaction | undefined> {
     return this.transactions.get(id);
   }
