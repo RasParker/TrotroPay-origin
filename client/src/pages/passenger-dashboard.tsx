@@ -289,30 +289,34 @@ export default function PassengerDashboard() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-md mx-auto">
-          <div className="flex">
-            <button className="flex-1 flex flex-col items-center py-4 bg-blue-50">
-              <Home className="h-5 w-5 text-blue-500 mb-1" />
-              <span className="text-xs text-blue-500 font-medium">Home</span>
-            </button>
-            
-            <button 
-              onClick={() => setLocation("/history")}
-              className="flex-1 flex flex-col items-center py-4"
-            >
-              <History className="h-5 w-5 text-gray-500 mb-1" />
-              <span className="text-xs text-gray-500">History</span>
-            </button>
-            
-            <button 
-              onClick={() => setLocation("/profile")}
-              className="flex-1 flex flex-col items-center py-4"
-            >
-              <User className="h-5 w-5 text-gray-500 mb-1" />
-              <span className="text-xs text-gray-500">Profile</span>
-            </button>
-          </div>
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-border bottom-nav-safe">
+        <div className="flex">
+          <Button variant="ghost" className="flex-1 py-3 text-primary">
+            <div className="text-center">
+              <Home className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">Home</span>
+            </div>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/history")}
+          >
+            <div className="text-center">
+              <History className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">History</span>
+            </div>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-3 text-muted-foreground"
+            onClick={() => setLocation("/profile")}
+          >
+            <div className="text-center">
+              <User className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">Profile</span>
+            </div>
+          </Button>
         </div>
       </div>
 
