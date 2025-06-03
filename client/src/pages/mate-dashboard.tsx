@@ -115,27 +115,7 @@ export default function MateDashboard() {
           </Card>
         )}
 
-        {/* QR Code Display */}
-        <Card className="mb-4">
-          <CardContent className="p-6 text-center">
-            <h3 className="font-medium text-foreground mb-4">Passenger Scan Code</h3>
-            <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
-              {/* Mock QR Code */}
-              <div className="relative">
-                <div className="w-40 h-40 bg-black/90 rounded-lg relative">
-                  <div className="absolute inset-2 bg-white rounded"></div>
-                  <div className="absolute inset-4 bg-black/80 rounded"></div>
-                  <div className="absolute inset-6 bg-white rounded"></div>
-                  <div className="absolute inset-8 bg-black/60 rounded"></div>
-                </div>
-                <QrCode className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-white" />
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Show this to passengers
-            </p>
-          </CardContent>
-        </Card>
+        
 
         {/* Today's Performance */}
         <div className="grid grid-cols-2 gap-4 mb-6">
