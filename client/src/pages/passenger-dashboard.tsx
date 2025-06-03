@@ -11,11 +11,14 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PaymentFlow from "@/pages/payment-flow";
 
 export default function PassengerDashboard() {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [manualVehicleId, setManualVehicleId] = useState("");
+  const [showPaymentFlow, setShowPaymentFlow] = useState(false);
+  const [paymentVehicleId, setPaymentVehicleId] = useState("");
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -84,6 +87,16 @@ export default function PassengerDashboard() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Show payment flow if requested
+  if (showPaymentFlow) {
+    return (
+      <PaymentFlow 
+        vehicleId={paymentVehicleId} 
+        onBack={() => setShowPaymentFlow(false)} 
+      />
     );
   }
 
@@ -168,13 +181,9 @@ export default function PassengerDashboard() {
         {/* Group Payment Demo */}
         <div className="mb-6">
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log("Group payment button clicked");
-              console.log("Current location:", location);
-              setLocation("#payment/GT-1234-20");
-              console.log("New location set to:", "#payment/GT-1234-20");
+            onClick={() => {
+              setPaymentVehicleId("GT-1234-20");
+              setShowPaymentFlow(true);
             }}
             className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700 rounded-md cursor-pointer active:scale-95 transition-transform"
             style={{ touchAction: 'manipulation' }}
