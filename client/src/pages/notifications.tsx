@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Bell, Clock, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { ArrowLeft, Bell, Clock, CheckCircle, AlertCircle, Info, FileText, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 interface NotificationsPageProps {
@@ -12,41 +12,145 @@ interface NotificationsPageProps {
 export default function NotificationsPage({ onBack }: NotificationsPageProps) {
   const { user } = useAuth();
 
-  // Mock notifications - in a real app, this would come from an API
-  const notifications = [
-    {
-      id: 1,
-      type: "payment",
-      title: "Payment Received",
-      message: "GH₵ 3.50 received from passenger for Lapaz trip",
-      time: new Date(Date.now() - 5 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: 2,
-      type: "info",
-      title: "Route Update",
-      message: "Your assigned route has been updated to Circle - Lapaz",
-      time: new Date(Date.now() - 30 * 60 * 1000),
-      read: true,
-    },
-    {
-      id: 3,
-      type: "warning",
-      title: "Vehicle Maintenance",
-      message: "GT-1234-20 is due for maintenance check",
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: 4,
-      type: "success",
-      title: "Daily Target Reached",
-      message: "Congratulations! You've reached your daily collection target",
-      time: new Date(Date.now() - 3 * 60 * 60 * 1000),
-      read: true,
-    },
-  ];
+  // Create role-specific notifications
+  const getNotificationsForRole = (userRole: string) => {
+    if (userRole === "owner") {
+      return [
+        {
+          id: 1,
+          title: "Daily Revenue Summary",
+          message: "Total fleet earnings: GH₵ 285.50 from 3 vehicles",
+          time: "30 minutes ago", 
+          type: "success" as const,
+          icon: <CheckCircle className="h-5 w-5" />,
+        },
+        {
+          id: 2,
+          title: "Vehicle Maintenance Due",
+          message: "GR-1234-20 needs service in 2 days",
+          time: "2 hours ago",
+          type: "warning" as const,
+          icon: <AlertTriangle className="h-5 w-5" />,
+        },
+        {
+          id: 3,
+          title: "Low Performance Alert",
+          message: "Vehicle GR-5678-21 earnings down 15% this week",
+          time: "4 hours ago",
+          type: "warning" as const,
+          icon: <AlertTriangle className="h-5 w-5" />,
+        },
+        {
+          id: 4,
+          title: "Driver Commission Paid",
+          message: "Kwame Asante - GH₵ 42.75 commission transferred",
+          time: "6 hours ago",
+          type: "info" as const,
+          icon: <Info className="h-5 w-5" />,
+        },
+        {
+          id: 5,
+          title: "New Driver Application",
+          message: "John Mensah applied to drive vehicle GR-9876-22",
+          time: "1 day ago",
+          type: "info" as const,
+          icon: <FileText className="h-5 w-5" />,
+        },
+        {
+          id: 6,
+          title: "Insurance Renewal",
+          message: "Vehicle GR-1234-20 insurance expires in 15 days",
+          time: "2 days ago",
+          type: "warning" as const,
+          icon: <AlertTriangle className="h-5 w-5" />,
+        },
+      ];
+    } else if (userRole === "driver") {
+      return [
+        {
+          id: 1,
+          title: "Daily Earnings",
+          message: "You earned GH₵ 45.30 today (15% commission)",
+          time: "1 hour ago",
+          type: "success" as const,
+          icon: <CheckCircle className="h-5 w-5" />,
+        },
+        {
+          id: 2,
+          title: "Route Update",
+          message: "New stops added to Accra-Kumasi route",
+          time: "3 hours ago",
+          type: "info" as const,
+          icon: <Info className="h-5 w-5" />,
+        },
+        {
+          id: 3,
+          title: "Vehicle Check Required",
+          message: "Please inspect vehicle before starting today",
+          time: "1 day ago",
+          type: "warning" as const,
+          icon: <AlertTriangle className="h-5 w-5" />,
+        },
+      ];
+    } else if (userRole === "mate") {
+      return [
+        {
+          id: 1,
+          title: "Payment Received",
+          message: "GH₵ 2.50 received from passenger",
+          time: "2 minutes ago",
+          type: "success" as const,
+          icon: <CheckCircle className="h-5 w-5" />,
+        },
+        {
+          id: 2,
+          title: "Daily Commission",
+          message: "You earned GH₵ 28.50 today (10% commission)",
+          time: "1 hour ago",
+          type: "success" as const,
+          icon: <CheckCircle className="h-5 w-5" />,
+        },
+        {
+          id: 3,
+          title: "Route Update",
+          message: "New stops added to current route",
+          time: "4 hours ago",
+          type: "info" as const,
+          icon: <Info className="h-5 w-5" />,
+        },
+      ];
+    } else {
+      // Passenger notifications
+      return [
+        {
+          id: 1,
+          title: "Payment Successful",
+          message: "GH₵ 2.50 paid for Accra-Tema trip",
+          time: "10 minutes ago",
+          type: "success" as const,
+          icon: <CheckCircle className="h-5 w-5" />,
+        },
+        {
+          id: 2,
+          title: "Low Balance Alert",
+          message: "Your wallet balance is below GH₵ 5.00",
+          time: "2 hours ago",
+          type: "warning" as const,
+          icon: <AlertTriangle className="h-5 w-5" />,
+        },
+        {
+          id: 3,
+          title: "Trip History Updated",
+          message: "Your recent trip details are now available",
+          time: "1 day ago",
+          type: "info" as const,
+          icon: <FileText className="h-5 w-5" />,
+        },
+      ];
+    }
+  };
+
+  const notifications = getNotificationsForRole(user?.role || "passenger");
 
   const getIcon = (type: string) => {
     switch (type) {
