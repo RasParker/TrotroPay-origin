@@ -24,6 +24,7 @@ export default function DriverDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showRouteDialog, setShowRouteDialog] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState<any>(null);
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/driver/${user?.id}`],
@@ -54,6 +55,7 @@ export default function DriverDashboard() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [`/api/dashboard/driver/${user?.id}`] });
       setShowRouteDialog(false);
+      setSelectedRoute(null);
       toast({
         title: "Route Updated",
         description: `Successfully changed to ${data.route.name}`,
@@ -297,16 +299,9 @@ export default function DriverDashboard() {
               {routes?.map((route: any) => (
                 <Button
                   key={route.id}
-                  variant="outline"
+                  variant={selectedRoute?.id === route.id ? "default" : "outline"}
                   className="w-full justify-start h-auto p-4"
-                  onClick={() => {
-                    if (dashboardData?.vehicle?.vehicleId) {
-                      routeChangeMutation.mutate({
-                        vehicleId: dashboardData.vehicle.vehicleId,
-                        routeId: route.id
-                      });
-                    }
-                  }}
+                  onClick={() => setSelectedRoute(route)}
                   disabled={routeChangeMutation.isPending}
                 >
                   <div className="text-left">
@@ -331,10 +326,26 @@ export default function DriverDashboard() {
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
-                onClick={() => setShowRouteDialog(false)}
+                onClick={() => {
+                  setShowRouteDialog(false);
+                  setSelectedRoute(null);
+                }}
                 disabled={routeChangeMutation.isPending}
               >
                 Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedRoute && dashboardData?.vehicle?.vehicleId) {
+                    routeChangeMutation.mutate({
+                      vehicleId: dashboardData.vehicle.vehicleId,
+                      routeId: selectedRoute.id
+                    });
+                  }
+                }}
+                disabled={!selectedRoute || routeChangeMutation.isPending}
+              >
+                Confirm
               </Button>
             </div>
           </div>
