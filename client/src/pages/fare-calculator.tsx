@@ -35,10 +35,15 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
     },
     onSuccess: (data) => {
       console.log('Fare calculation result:', data);
+      console.log('Data type:', typeof data);
+      console.log('Data properties:', Object.keys(data || {}));
       try {
         if (data && typeof data === 'object') {
+          console.log('Setting fare result with data:', JSON.stringify(data));
           setFareResult(data);
+          console.log('Fare result set successfully');
         } else {
+          console.error('Invalid response format - data is not an object');
           throw new Error('Invalid response format');
         }
       } catch (error) {
@@ -189,8 +194,17 @@ export default function FareCalculator({ onBack }: FareCalculatorProps) {
           </CardContent>
         </Card>
 
+        {/* Debug Display */}
+        {fareResult && (
+          <Card className="mb-4 bg-yellow-50">
+            <CardContent className="p-2">
+              <pre className="text-xs">{JSON.stringify(fareResult, null, 2)}</pre>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Fare Result */}
-        {fareResult && fareResult.amount !== undefined && (
+        {fareResult && (
           <Card className="mb-4">
             <CardHeader>
               <CardTitle className="text-green-600">Fare Calculation</CardTitle>
