@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { User, Users, Car, Building2 } from "lucide-react";
+import { User, Users, Car, Building2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -42,8 +42,20 @@ export default function AuthPage() {
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isOnboarding, setIsOnboarding] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const { login } = useAuth();
   const { toast } = useToast();
+
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const savedRole = localStorage.getItem('userRole');
+    if (savedRole) {
+      setIsOnboarding(false);
+      setUserRole(savedRole);
+      setSelectedRole(savedRole);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,8 +87,13 @@ export default function AuthPage() {
     }
   };
 
-  // Mock login with predefined test accounts
-  const handleMockLogin = (role: string) => {
+  const handleRoleSelection = (role: string) => {
+    setSelectedRole(role);
+    setUserRole(role);
+    localStorage.setItem('userRole', role);
+    setIsOnboarding(false);
+    
+    // Auto-fill test credentials for demo
     const mockAccounts = {
       passenger: { phone: "0245678901", pin: "1234" },
       mate: { phone: "0234567890", pin: "1234" },
@@ -88,8 +105,16 @@ export default function AuthPage() {
     if (account) {
       setPhone(account.phone);
       setPin(account.pin);
-      setSelectedRole(role);
     }
+  };
+
+  const handleBackToOnboarding = () => {
+    localStorage.removeItem('userRole');
+    setIsOnboarding(true);
+    setUserRole(null);
+    setSelectedRole(null);
+    setPhone("");
+    setPin("");
   };
 
   return (
@@ -104,81 +129,119 @@ export default function AuthPage() {
           <p className="text-muted-foreground">Digital payments for Ghana's trotros</p>
         </div>
 
-        {/* Role Selection - 2x2 Grid */}
-        <div className="mb-8">
-          <h2 className="text-lg font-medium text-center mb-2">Welcome Back</h2>
-          <p className="text-sm text-muted-foreground text-center mb-6">Choose your role and sign in to continue</p>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {roles.map((role) => {
-              const Icon = role.icon;
-              return (
-                <Card 
-                  key={role.id}
-                  className={`cursor-pointer transition-all border-2 ${
-                    selectedRole === role.id 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-primary/50"
-                  }`}
-                  onClick={() => handleMockLogin(role.id)}
-                >
-                  <CardContent className="p-4 text-center">
-                    <div className={`inline-flex p-3 rounded-lg bg-background/50 mb-3 ${role.color}`}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-medium text-sm mb-1">{role.title}</h3>
-                    <p className="text-xs text-muted-foreground leading-tight">{role.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+        {/* Onboarding - Role Selection for New Users */}
+        {isOnboarding && (
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-center mb-2">Get Started</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">Choose your role to continue</p>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {roles.map((role) => {
+                const Icon = role.icon;
+                return (
+                  <Card 
+                    key={role.id}
+                    className="cursor-pointer transition-all border-2 border-border hover:border-primary/50"
+                    onClick={() => handleRoleSelection(role.id)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className={`inline-flex p-3 rounded-lg bg-background/50 mb-3 ${role.color}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h3 className="font-medium text-sm mb-1">{role.title}</h3>
+                      <p className="text-xs text-muted-foreground leading-tight">{role.description}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Login Form */}
-        <Card className="flex-1">
-          <CardHeader>
-            <h3 className="text-lg font-medium text-center">Sign In</h3>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+        {/* Returning User - Role-Specific Login */}
+        {!isOnboarding && userRole && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <Input
-                  type="tel"
-                  placeholder="Phone Number (e.g., 0245678901)"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="text-center"
-                />
+                <h2 className="text-lg font-medium">Welcome Back</h2>
+                <p className="text-sm text-muted-foreground">
+                  Signing in as {roles.find(r => r.id === userRole)?.title}
+                </p>
               </div>
-              <div>
-                <Input
-                  type="password"
-                  placeholder="PIN (e.g., 1234)"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  maxLength={4}
-                  className="text-center"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isLoading}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBackToOnboarding}
+                className="text-muted-foreground"
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-            </form>
+            </div>
+            
+            <Card className="border-primary bg-primary/5">
+              <CardContent className="p-4 text-center">
+                {(() => {
+                  const currentRole = roles.find(r => r.id === userRole);
+                  const Icon = currentRole?.icon || User;
+                  return (
+                    <>
+                      <div className={`inline-flex p-3 rounded-lg bg-background/50 mb-3 ${currentRole?.color}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h3 className="font-medium text-sm mb-1">{currentRole?.title}</h3>
+                      <p className="text-xs text-muted-foreground leading-tight">{currentRole?.description}</p>
+                    </>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-            {selectedRole && (
+        {/* Login Form - Only show after role selection */}
+        {!isOnboarding && selectedRole && (
+          <Card className="flex-1">
+            <CardHeader>
+              <h3 className="text-lg font-medium text-center">Sign In</h3>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Input
+                    type="tel"
+                    placeholder="Phone Number (e.g., 0245678901)"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="text-center"
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="PIN (e.g., 1234)"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    maxLength={4}
+                    className="text-center"
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing In..." : "Sign In"}
+                </Button>
+              </form>
+
               <div className="mt-4 p-3 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground text-center">
                   Demo credentials filled for {selectedRole}. Click "Sign In" to continue.
                 </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
