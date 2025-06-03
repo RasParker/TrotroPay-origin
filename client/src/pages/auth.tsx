@@ -74,17 +74,27 @@ export default function AuthPage() {
       return;
     }
 
+    if (pin.length !== 4) {
+      toast({
+        title: "Invalid PIN",
+        description: "PIN must be exactly 4 digits",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await login(phone, pin);
+      await login(phone.trim(), pin.trim());
       toast({
         title: "Welcome!",
         description: "Successfully logged in to TrotroPay",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: "Invalid phone number or PIN",
+        description: error.message || "Invalid phone number or PIN",
         variant: "destructive",
       });
     } finally {

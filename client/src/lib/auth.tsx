@@ -23,11 +23,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { data: authData, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
     if (authData?.user) {
       setUser(authData.user);
+    } else if (authData === null) {
+      setUser(null);
     }
   }, [authData]);
 

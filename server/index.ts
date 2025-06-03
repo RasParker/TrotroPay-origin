@@ -9,12 +9,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // Add session middleware
 app.use(session({
-  secret: 'your-secret-key',
+  secret: "dev-secret-key-change-in-production",
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: false, // Set to true if using HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: false,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax'
   }
 }));
 
