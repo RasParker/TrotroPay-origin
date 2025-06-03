@@ -90,28 +90,7 @@ export default function PassengerProfile({ onBack }: ProfilePageProps) {
           </CardContent>
         </Card>
 
-        {/* Balance Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <CreditCard className="h-5 w-5 mr-2" />
-              Wallet Balance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg">
-              <p className="text-sm opacity-90">Current Balance</p>
-              <p className="text-3xl font-bold">{formatAmount(user?.momoBalance || "0")}</p>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="mt-3 bg-white/20 text-white border-0 hover:bg-white/30"
-              >
-                Top Up Wallet
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Security */}
         <Card>

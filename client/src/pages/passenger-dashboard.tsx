@@ -119,7 +119,7 @@ export default function PassengerDashboard() {
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-blue-100 text-sm">MoMo Balance</p>
+                <p className="text-blue-100 text-sm">Wallet Balance</p>
                 <p className="text-2xl font-bold">
                   {formatAmount(dashboardData?.user?.momoBalance || "0")}
                 </p>
