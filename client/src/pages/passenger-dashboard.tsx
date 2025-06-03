@@ -179,22 +179,27 @@ export default function PassengerDashboard() {
         </div>
 
         {/* Group Payment Demo */}
-        <div className="mb-6">
-          <button
-            onClick={() => {
-              setPaymentVehicleId("GT-1234-20");
-              setShowPaymentFlow(true);
-            }}
-            className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 hover:from-green-600 hover:to-green-700 rounded-md cursor-pointer active:scale-95 transition-transform"
-            style={{ touchAction: 'manipulation' }}
-          >
-            <div className="text-center pointer-events-none">
-              <Users className="h-6 w-6 mx-auto mb-1" />
-              <span className="font-medium block">Try Group Payment</span>
-              <p className="text-xs opacity-90">Pay for multiple passengers</p>
-            </div>
-          </button>
-        </div>
+        <Card className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardContent className="p-0">
+            <button
+              onClick={() => {
+                setPaymentVehicleId("GT-1234-20");
+                setShowPaymentFlow(true);
+              }}
+              className="w-full p-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg shadow-md hover:from-green-600 hover:to-emerald-700 active:scale-98 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center space-x-3">
+                <div className="bg-white/20 p-2 rounded-full">
+                  <Users className="h-6 w-6" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Try Group Payment</div>
+                  <div className="text-green-100 text-sm">Pay for multiple passengers</div>
+                </div>
+              </div>
+            </button>
+          </CardContent>
+        </Card>
 
         {/* Recent Trips */}
         <div className="mb-6">
