@@ -401,13 +401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Find the driver's vehicle on this route
-      console.log("Driver ID:", user.id);
-      console.log("Route name:", route.name);
-      console.log("All vehicles:", allVehicles.map(v => ({ id: v.id, driverId: v.driverId, route: v.route })));
-      
       const userVehicle = allVehicles.find(v => v.driverId === user.id && v.route === route.name);
-      console.log("Found user vehicle:", userVehicle);
-      
       if (!userVehicle) {
         return res.status(403).json({ message: "You are not assigned to a vehicle on this route" });
       }
