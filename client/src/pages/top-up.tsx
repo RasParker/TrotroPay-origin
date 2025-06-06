@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, CreditCard, Smartphone, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, CreditCard, Smartphone, Plus, Search, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,8 +17,33 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("mtn");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRoute, setSelectedRoute] = useState("");
 
   const quickAmounts = ["5.00", "10.00", "20.00", "50.00"];
+
+  // Fetch all routes for search
+  const { data: routes } = useQuery({
+    queryKey: ['/api/routes'],
+  });
+
+  // Filter routes based on search query
+  const filteredRoutes = routes?.filter((route: any) => 
+    route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    route.startPoint?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    route.endPoint?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const handleRouteSearch = (routeId: string) => {
+    const route = routes?.find((r: any) => r.id.toString() === routeId);
+    if (route) {
+      setSelectedRoute(routeId);
+      toast({
+        title: "Route Selected",
+        description: `You selected ${route.name}. Check nearby vehicles or use the fare calculator.`,
+      });
+    }
+  };
 
   const handleTopUp = () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -163,6 +190,67 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Search Trip Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Search className="h-5 w-5" />
+              <span>Search Trip</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search routes (e.g., Circle - Lapaz, Tema)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {searchQuery && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  Available Routes
+                </label>
+                <Select value={selectedRoute} onValueChange={handleRouteSearch}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a route" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredRoutes.length > 0 ? (
+                      filteredRoutes.map((route: any) => (
+                        <SelectItem key={route.id} value={route.id.toString()}>
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span>{route.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-results" disabled>
+                        No routes found
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {selectedRoute && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-800">
+                    Route selected! You can now look for vehicles on this route or calculate fares.
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
