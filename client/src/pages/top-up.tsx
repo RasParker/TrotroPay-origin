@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, CreditCard, Smartphone, Plus, Search, MapPin } from "lucide-react";
+import { ArrowLeft, CreditCard, Smartphone, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,34 +15,8 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("mtn");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRoute, setSelectedRoute] = useState("");
 
   const quickAmounts = ["5.00", "10.00", "20.00", "50.00"];
-
-  // Fetch all routes for search
-  const { data: routes } = useQuery({
-    queryKey: ['/api/routes'],
-  });
-
-  // Filter routes based on search query
-  const filteredRoutes = routes?.filter((route: any) => 
-    route.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    route.startPoint?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    route.endPoint?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
-
-  const handleRouteSearch = (routeId: string) => {
-    const route = routes?.find((r: any) => r.id.toString() === routeId);
-    if (route) {
-      setSelectedRoute(routeId);
-      toast({
-        title: "Route Selected",
-        description: `You selected Route ${route.code} - ${route.name}. Check nearby vehicles or use the fare calculator.`,
-      });
-    }
-  };
 
   const handleTopUp = () => {
     if (!amount || parseFloat(amount) <= 0) {

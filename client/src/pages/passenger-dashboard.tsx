@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Edit3, Plus, History, User, Home, Bell, LogOut, Users, Calculator } from "lucide-react";
+import { QrCode, Edit3, Plus, History, User, Home, Bell, LogOut, Users, Calculator, Search, MapPin } from "lucide-react";
 import { QRScanner } from "@/components/ui/qr-scanner";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,8 @@ export default function PassengerDashboard() {
   const [manualVehicleId, setManualVehicleId] = useState("");
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
   const [paymentVehicleId, setPaymentVehicleId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRoute, setSelectedRoute] = useState("");
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -29,9 +31,33 @@ export default function PassengerDashboard() {
     enabled: !!user?.id,
   });
 
+  // Fetch all routes for search
+  const { data: routes } = useQuery({
+    queryKey: ['/api/routes'],
+  });
+
   // Safely extract data with fallbacks
   const userData = (dashboardData as any)?.user || user;
   const recentTransactions = (dashboardData as any)?.recentTransactions || [];
+
+  // Filter routes based on search query
+  const filteredRoutes = routes?.filter((route: any) => 
+    route.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    route.startPoint?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    route.endPoint?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const handleRouteSearch = (routeId: string) => {
+    const route = routes?.find((r: any) => r.id.toString() === routeId);
+    if (route) {
+      setSelectedRoute(routeId);
+      toast({
+        title: "Route Selected",
+        description: `You selected Route ${route.code} - ${route.name}. Check nearby vehicles or use the fare calculator.`,
+      });
+    }
+  };
 
   const handleQRScan = (vehicleId: string) => {
     setShowQRScanner(false);
@@ -151,6 +177,71 @@ export default function PassengerDashboard() {
                 Top Up
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Search Trip Section */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <Search className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-medium">Search Trip</h3>
+            </div>
+            
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search routes (e.g., 192, Circle - Lapaz, Tema)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {searchQuery && filteredRoutes.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <label className="block text-sm font-medium text-foreground">
+                  Search Results
+                </label>
+                <div className="space-y-2">
+                  {filteredRoutes.map((route: any) => (
+                    <div
+                      key={route.id}
+                      onClick={() => handleRouteSearch(route.id.toString())}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
+                        selectedRoute === route.id.toString() ? "border-primary bg-primary/5" : "border-border"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-bold text-primary text-lg">{route.code}</span>
+                        <span className="font-medium">{route.name}</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground ml-7">
+                        {route.startPoint} → {route.endPoint}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {searchQuery && filteredRoutes.length === 0 && (
+              <div className="p-3 text-center text-muted-foreground mt-4">
+                No routes found for "{searchQuery}"
+              </div>
+            )}
+
+            {selectedRoute && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg mt-4">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-800">
+                    Route selected! You can now look for vehicles on this route or calculate fares.
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
