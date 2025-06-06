@@ -338,6 +338,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new route
+  app.post("/api/routes", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { name, startPoint, endPoint, distance } = req.body;
+
+      if (!name || !startPoint || !endPoint || !distance) {
+        return res.status(400).json({ 
+          error: "All fields are required: name, startPoint, endPoint, distance" 
+        });
+      }
+
+      // Check if route with same name already exists
+      const existingRoute = await storage.getRouteByName(name);
+      if (existingRoute) {
+        return res.status(400).json({ 
+          error: "A route with this name already exists" 
+        });
+      }
+
+      // Create the new route with default stops
+      const newRoute = await storage.createRoute({
+        name,
+        startPoint,
+        endPoint,
+        distance: parseFloat(distance),
+        stops: [startPoint, endPoint], // Start with basic stops
+        fares: [0, 2.0] // Default fare structure
+      });
+
+      res.json({
+        message: "Route created successfully",
+        route: newRoute
+      });
+    } catch (error) {
+      console.error("Error creating route:", error);
+      res.status(500).json({ error: "Failed to create route" });
+    }
+  });
+
   // Calculate fare between two stops on a route
   app.post("/api/routes/:routeId/calculate-fare", async (req, res) => {
     try {
