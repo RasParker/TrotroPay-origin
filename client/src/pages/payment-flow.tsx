@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,6 +27,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
 
   const { data: vehicle, isLoading: vehicleLoading } = useQuery({
     queryKey: [`/api/vehicles/by-id/${vehicleId}`],
@@ -344,7 +346,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => window.location.href = "/top-up"}
+                  onClick={() => setLocation("/top-up")}
                   className="border-warning text-warning hover:bg-warning hover:text-white"
                 >
                   Top Up
