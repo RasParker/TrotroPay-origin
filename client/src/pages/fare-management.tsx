@@ -222,14 +222,6 @@ export default function FareManagement({ onBack }: FareManagementProps) {
 
                 <div className="flex space-x-2 mt-4">
                   <Button 
-                    onClick={() => handleEditFares(currentRoute)}
-                    className="flex-1"
-                    disabled={updateFaresMutation.isPending || editingStops}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Update Fares (₵)
-                  </Button>
-                  <Button 
                     onClick={() => handleEditStops(currentRoute)}
                     variant="outline"
                     className="flex-1"
@@ -237,6 +229,14 @@ export default function FareManagement({ onBack }: FareManagementProps) {
                   >
                     <MapPin className="h-4 w-4 mr-2" />
                     Manage Stops
+                  </Button>
+                  <Button 
+                    onClick={() => handleEditFares(currentRoute)}
+                    className="flex-1"
+                    disabled={updateFaresMutation.isPending || editingStops}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Update Fares (₵)
                   </Button>
                 </div>
               </div>
