@@ -311,22 +311,22 @@ export default function DriverDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className={`flex-1 py-3 ${location === "/performance" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
-            onClick={() => setLocation("/performance")}
-          >
-            <div className="text-center">
-              <BarChart3 className="h-5 w-5 mx-auto mb-1" />
-              <span className="text-xs">Performance</span>
-            </div>
-          </Button>
-          <Button 
-            variant="ghost" 
             className={`flex-1 py-3 ${location === "/fare-management" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/fare-management")}
           >
             <div className="text-center">
               <DollarSign className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Fares</span>
+            </div>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className={`flex-1 py-3 ${location === "/performance" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
+            onClick={() => setLocation("/performance")}
+          >
+            <div className="text-center">
+              <BarChart3 className="h-5 w-5 mx-auto mb-1" />
+              <span className="text-xs">Performance</span>
             </div>
           </Button>
           <Button 
