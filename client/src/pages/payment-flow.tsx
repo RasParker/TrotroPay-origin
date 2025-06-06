@@ -17,6 +17,7 @@ interface PaymentFlowProps {
 export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const [boardingStop, setBoardingStop] = useState("");
   const [alightingStop, setAlightingStop] = useState("");
+  const [selectedDestination, setSelectedDestination] = useState("");
   const [fareAmount, setFareAmount] = useState("0.00");
   const [passengerCount, setPassengerCount] = useState(1);
   const [totalAmount, setTotalAmount] = useState("0.00");
