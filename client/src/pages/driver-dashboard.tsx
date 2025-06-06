@@ -206,7 +206,7 @@ export default function DriverDashboard() {
         {/* Route Management */}
         <Card className="mb-4">
           <CardContent className="p-4">
-            <div className="flex justify-between items-center">
+            <div className="space-y-4">
               <div>
                 <h3 className="font-medium text-foreground">Route Management</h3>
                 <p className="text-muted-foreground">
@@ -216,7 +216,7 @@ export default function DriverDashboard() {
               <div className="flex space-x-2">
                 <Button 
                   variant="outline" 
-                  size="sm"
+                  className="flex-1"
                   onClick={() => setShowCreateRouteDialog(true)}
                 >
                   <Plus className="h-4 w-4 mr-1" />
@@ -224,7 +224,7 @@ export default function DriverDashboard() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  size="sm"
+                  className="flex-1"
                   onClick={() => setShowRouteDialog(true)}
                 >
                   {dashboardData?.vehicle?.route ? "Change Route" : "Select Route"}
