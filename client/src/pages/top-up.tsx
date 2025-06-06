@@ -213,33 +213,37 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
               />
             </div>
             
-            {searchQuery && (
+            {searchQuery && filteredRoutes.length > 0 && (
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-foreground">
-                  Available Routes
+                  Search Results
                 </label>
-                <Select value={selectedRoute} onValueChange={handleRouteSearch}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a route" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredRoutes.length > 0 ? (
-                      filteredRoutes.map((route: any) => (
-                        <SelectItem key={route.id} value={route.id.toString()}>
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium text-primary">{route.code}</span>
-                            <span>{route.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-results" disabled>
-                        No routes found
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  {filteredRoutes.map((route: any) => (
+                    <div
+                      key={route.id}
+                      onClick={() => handleRouteSearch(route.id.toString())}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
+                        selectedRoute === route.id.toString() ? "border-primary bg-primary/5" : "border-border"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-bold text-primary text-lg">{route.code}</span>
+                        <span className="font-medium">{route.name}</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground ml-7">
+                        {route.startPoint} → {route.endPoint}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {searchQuery && filteredRoutes.length === 0 && (
+              <div className="p-3 text-center text-muted-foreground">
+                No routes found for "{searchQuery}"
               </div>
             )}
 
