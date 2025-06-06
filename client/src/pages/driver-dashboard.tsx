@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Bus, 
   TrendingUp, 
@@ -12,7 +14,8 @@ import {
   LogOut, 
   DollarSign,
   BarChart3,
-  Settings
+  Settings,
+  Plus
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +28,11 @@ export default function DriverDashboard() {
   const queryClient = useQueryClient();
   const [showRouteDialog, setShowRouteDialog] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<any>(null);
+  const [showCreateRouteDialog, setShowCreateRouteDialog] = useState(false);
+  const [newRouteName, setNewRouteName] = useState("");
+  const [newRouteStart, setNewRouteStart] = useState("");
+  const [newRouteEnd, setNewRouteEnd] = useState("");
+  const [newRouteDistance, setNewRouteDistance] = useState("");
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/driver/${user?.id}`],
@@ -66,6 +74,32 @@ export default function DriverDashboard() {
       toast({
         title: "Route Change Failed",
         description: error.message || "Failed to update route",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create route mutation
+  const createRouteMutation = useMutation({
+    mutationFn: async (routeData: { name: string; startPoint: string; endPoint: string; distance: number }) => {
+      return apiRequest("POST", "/api/routes", routeData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Route Created",
+        description: "New route has been created successfully",
+      });
+      setShowCreateRouteDialog(false);
+      setNewRouteName("");
+      setNewRouteStart("");
+      setNewRouteEnd("");
+      setNewRouteDistance("");
+      queryClient.invalidateQueries({ queryKey: ['/api/routes'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create route",
         variant: "destructive",
       });
     },
@@ -169,23 +203,33 @@ export default function DriverDashboard() {
           </Card>
         </div>
 
-        {/* Current Route */}
+        {/* Route Management */}
         <Card className="mb-4">
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-medium text-foreground">Current Route</h3>
+                <h3 className="font-medium text-foreground">Route Management</h3>
                 <p className="text-muted-foreground">
-                  {dashboardData?.vehicle?.route || "No route assigned"}
+                  Manage your routes and create new ones
                 </p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowRouteDialog(true)}
-              >
-                {dashboardData?.vehicle?.route ? "Change Route" : "Select Route"}
-              </Button>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowCreateRouteDialog(true)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Create Route
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowRouteDialog(true)}
+                >
+                  {dashboardData?.vehicle?.route ? "Change Route" : "Select Route"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -365,6 +409,100 @@ export default function DriverDashboard() {
                 disabled={!selectedRoute || routeChangeMutation.isPending}
               >
                 Confirm
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Route Dialog */}
+      <Dialog open={showCreateRouteDialog} onOpenChange={setShowCreateRouteDialog}>
+        <DialogContent className="!w-[80vw] !max-w-xs !mx-auto !p-4 sm:!max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg">Create New Route</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Create a new route that will be available for all drivers to select and manage.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="routeName">Route Name</Label>
+                <Input
+                  id="routeName"
+                  placeholder="e.g., Circle - Lapaz"
+                  value={newRouteName}
+                  onChange={(e) => setNewRouteName(e.target.value)}
+                  disabled={createRouteMutation.isPending}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="startPoint">Start Point</Label>
+                <Input
+                  id="startPoint"
+                  placeholder="e.g., Circle"
+                  value={newRouteStart}
+                  onChange={(e) => setNewRouteStart(e.target.value)}
+                  disabled={createRouteMutation.isPending}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="endPoint">End Point</Label>
+                <Input
+                  id="endPoint"
+                  placeholder="e.g., Lapaz"
+                  value={newRouteEnd}
+                  onChange={(e) => setNewRouteEnd(e.target.value)}
+                  disabled={createRouteMutation.isPending}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="distance">Distance (km)</Label>
+                <Input
+                  id="distance"
+                  type="number"
+                  placeholder="e.g., 12.5"
+                  value={newRouteDistance}
+                  onChange={(e) => setNewRouteDistance(e.target.value)}
+                  disabled={createRouteMutation.isPending}
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-2 pt-4">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowCreateRouteDialog(false);
+                  setNewRouteName("");
+                  setNewRouteStart("");
+                  setNewRouteEnd("");
+                  setNewRouteDistance("");
+                }}
+                disabled={createRouteMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  if (newRouteName && newRouteStart && newRouteEnd && newRouteDistance) {
+                    createRouteMutation.mutate({
+                      name: newRouteName,
+                      startPoint: newRouteStart,
+                      endPoint: newRouteEnd,
+                      distance: parseFloat(newRouteDistance)
+                    });
+                  }
+                }}
+                disabled={!newRouteName || !newRouteStart || !newRouteEnd || !newRouteDistance || createRouteMutation.isPending}
+              >
+                {createRouteMutation.isPending ? "Creating..." : "Create Route"}
               </Button>
             </div>
           </div>
