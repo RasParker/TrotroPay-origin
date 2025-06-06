@@ -29,6 +29,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
 
   // Filter routes based on search query
   const filteredRoutes = routes?.filter((route: any) => 
+    route.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     route.startPoint?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     route.endPoint?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -40,7 +41,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
       setSelectedRoute(routeId);
       toast({
         title: "Route Selected",
-        description: `You selected ${route.name}. Check nearby vehicles or use the fare calculator.`,
+        description: `You selected Route ${route.code} - ${route.name}. Check nearby vehicles or use the fare calculator.`,
       });
     }
   };
@@ -205,7 +206,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search routes (e.g., Circle - Lapaz, Tema)"
+                placeholder="Search routes (e.g., 192, Circle - Lapaz, Tema)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -227,6 +228,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
                         <SelectItem key={route.id} value={route.id.toString()}>
                           <div className="flex items-center space-x-2">
                             <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium text-primary">{route.code}</span>
                             <span>{route.name}</span>
                           </div>
                         </SelectItem>

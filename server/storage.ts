@@ -253,6 +253,7 @@ export class MemStorage implements IStorage {
     // Create test routes
     const route1: Route = {
       id: this.currentId++,
+      code: "192",
       name: "Circle - Lapaz",
       startPoint: "Circle",
       endPoint: "Lapaz",
@@ -264,6 +265,7 @@ export class MemStorage implements IStorage {
 
     const route2: Route = {
       id: this.currentId++,
+      code: "207",
       name: "Tema - Accra",
       startPoint: "Tema",
       endPoint: "Accra",
