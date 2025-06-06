@@ -22,7 +22,7 @@ export default function PassengerDashboard() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location, setLocation] = useLocation();
+  const [currentLocation, setLocation] = useLocation();
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: [`/api/dashboard/passenger/${user?.id}`],
@@ -291,7 +291,10 @@ export default function PassengerDashboard() {
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-border bottom-nav-safe">
         <div className="flex">
-          <Button variant="ghost" className="flex-1 py-3 text-primary">
+          <Button 
+            variant="ghost" 
+            className={`flex-1 py-3 ${currentLocation === "/" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
+          >
             <div className="text-center">
               <Home className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Home</span>
@@ -299,7 +302,7 @@ export default function PassengerDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${currentLocation === "/fare-calculator" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/fare-calculator")}
           >
             <div className="text-center">
@@ -309,7 +312,7 @@ export default function PassengerDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${currentLocation === "/history" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/history")}
           >
             <div className="text-center">
@@ -319,7 +322,7 @@ export default function PassengerDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${currentLocation === "/profile" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/profile")}
           >
             <div className="text-center">
