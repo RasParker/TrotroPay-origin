@@ -30,14 +30,14 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
 
     toast({
       title: "Top Up Initiated",
-      description: `A USSD prompt will be sent to ${user?.phone} to complete the GH₵${amount} top up.`,
+      description: `A USSD prompt will be sent to ${user?.phone} to complete the GH₵ ${parseFloat(amount).toFixed(2)} top up.`,
     });
     
     // Simulate USSD prompt
     setTimeout(() => {
       toast({
         title: "Top Up Successful",
-        description: `Your wallet has been credited with GH₵${amount}.`,
+        description: `Your wallet has been credited with GH₵ ${parseFloat(amount).toFixed(2)}.`,
       });
       onBack();
     }, 3000);
@@ -65,7 +65,10 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
         <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
           <CardContent className="p-4 text-center">
             <p className="text-blue-100 text-sm">Current Balance</p>
-            <p className="text-3xl font-bold">{formatAmount(user?.momoBalance || "0")}</p>
+            <div className="text-3xl font-bold">
+              <span className="text-lg mr-1">GH₵</span>
+              <span>{parseFloat(user?.momoBalance || "0").toFixed(2)}</span>
+            </div>
           </CardContent>
         </Card>
 
@@ -83,7 +86,8 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
                   onClick={() => setAmount(quickAmount)}
                   className="h-12"
                 >
-                  {formatAmount(quickAmount)}
+                  <span className="text-sm mr-1">GH₵</span>
+                  <span>{parseFloat(quickAmount).toFixed(2)}</span>
                 </Button>
               ))}
             </div>
@@ -169,7 +173,12 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
           disabled={!amount || parseFloat(amount) <= 0}
         >
           <Plus className="h-5 w-5 mr-2" />
-          Top Up {amount ? formatAmount(amount) : "Wallet"}
+          Top Up {amount ? (
+            <span>
+              <span className="text-sm mr-1">GH₵</span>
+              <span>{parseFloat(amount).toFixed(2)}</span>
+            </span>
+          ) : "Wallet"}
         </Button>
 
         <div className="text-center text-sm text-muted-foreground">
