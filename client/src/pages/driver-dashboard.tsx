@@ -20,7 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function DriverDashboard() {
   const { user, logout } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showRouteDialog, setShowRouteDialog] = useState(false);
@@ -256,7 +256,10 @@ export default function DriverDashboard() {
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-border bottom-nav-safe">
         <div className="flex">
-          <Button variant="ghost" className="flex-1 py-3 text-accent">
+          <Button 
+            variant="ghost" 
+            className={`flex-1 py-3 ${location === "/" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
+          >
             <div className="text-center">
               <Bus className="h-5 w-5 mx-auto mb-1" />
               <span className="text-xs">Dashboard</span>
@@ -264,7 +267,7 @@ export default function DriverDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${location === "/performance" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/performance")}
           >
             <div className="text-center">
@@ -274,7 +277,7 @@ export default function DriverDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${location === "/fare-management" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/fare-management")}
           >
             <div className="text-center">
@@ -284,7 +287,7 @@ export default function DriverDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${location === "/settings" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/settings")}
           >
             <div className="text-center">
