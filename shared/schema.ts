@@ -25,6 +25,7 @@ export const vehicles = pgTable("vehicles", {
 
 export const routes = pgTable("routes", {
   id: serial("id").primaryKey(),
+  code: text("code").notNull(),
   name: text("name").notNull(),
   startPoint: text("start_point").notNull(),
   endPoint: text("end_point").notNull(),
