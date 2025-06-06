@@ -334,11 +334,21 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
         {user && parseFloat(user.momoBalance) < parseFloat(totalAmount) && (
           <Card className="mt-4 border-warning">
             <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-warning" />
-                <p className="text-sm text-warning">
-                  Insufficient balance. Please top up your MoMo account.
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-warning" />
+                  <p className="text-sm text-warning">
+                    Insufficient balance. Please top up your MoMo account.
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = "/top-up"}
+                  className="border-warning text-warning hover:bg-warning hover:text-white"
+                >
+                  Top Up
+                </Button>
               </div>
             </CardContent>
           </Card>
