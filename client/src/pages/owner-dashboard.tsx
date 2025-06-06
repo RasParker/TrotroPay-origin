@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function OwnerDashboard() {
   const { user, logout } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
   const { data: dashboardData, isLoading } = useQuery({
@@ -225,7 +225,7 @@ export default function OwnerDashboard() {
         <div className="flex">
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-purple-600"
+            className={`flex-1 py-3 ${location === "/" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => {
               // Already on dashboard, just show feedback
               toast({
@@ -241,7 +241,7 @@ export default function OwnerDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${location === "/vehicles" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => {
               toast({
                 title: "Vehicles",
@@ -256,7 +256,7 @@ export default function OwnerDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${location === "/reports" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => {
               toast({
                 title: "Reports",
@@ -271,7 +271,7 @@ export default function OwnerDashboard() {
           </Button>
           <Button 
             variant="ghost" 
-            className="flex-1 py-3 text-muted-foreground"
+            className={`flex-1 py-3 ${location === "/settings" ? "text-blue-600 bg-blue-50" : "text-muted-foreground"}`}
             onClick={() => setLocation("/settings")}
           >
             <div className="text-center">
