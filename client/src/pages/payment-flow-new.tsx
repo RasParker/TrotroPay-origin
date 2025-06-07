@@ -20,7 +20,7 @@ interface PaymentFlowProps {
 export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onBack, isSinglePassenger = false }: PaymentFlowProps) {
   const [passengerCount, setPassengerCount] = useState(isSinglePassenger ? 1 : 1);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [totalAmount, setTotalAmount] = useState(fareAmount);
+  const [totalAmount, setTotalAmount] = useState(propFareAmount);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showInsufficientBalance, setShowInsufficientBalance] = useState(false);
   const { user } = useAuth();
@@ -79,13 +79,13 @@ export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onB
 
   // Update total when passenger count changes
   useEffect(() => {
-    const fare = parseFloat(fareAmount);
+    const fare = parseFloat(propFareAmount);
     const total = (fare * passengerCount).toFixed(2);
     setTotalAmount(total);
-  }, [fareAmount, passengerCount]);
+  }, [propFareAmount, passengerCount]);
 
   const paymentMutation = useMutation({
-    mutationFn: async (paymentData: { vehicleId: string; amount: string; passengerCount: number; paymentMethod: string }) => {
+    mutationFn: async (paymentData: { vehicleId: string; amount: string; passengerCount: number; paymentMethod: string; destination: string }) => {
       const response = await apiRequest("POST", "/api/payments/process", paymentData);
       return response;
     },
@@ -121,7 +121,8 @@ export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onB
       vehicleId: vehicleId,
       amount: totalAmount,
       passengerCount: passengerCount,
-      paymentMethod: selectedPaymentMethod
+      paymentMethod: selectedPaymentMethod,
+      destination: "General Transit" // Default destination for single payments
     });
   };
 
@@ -193,7 +194,7 @@ export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onB
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Fare per person:</span>
-                <span className="font-medium">{formatAmount(fareAmount)}</span>
+                <span className="font-medium">{formatAmount(propFareAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Number of passengers:</span>
@@ -207,27 +208,29 @@ export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onB
           </CardContent>
         </Card>
 
-        {/* Number of Passengers */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3 mb-3">
-              <Users className="h-5 w-5 text-primary" />
-              <h3 className="font-medium">Number of Passengers</h3>
-            </div>
-            <Select value={passengerCount.toString()} onValueChange={(value) => setPassengerCount(parseInt(value))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select number of passengers" />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
-                  <SelectItem key={count} value={count.toString()}>
-                    {count} passenger{count > 1 ? 's' : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        {/* Number of Passengers - Hidden for single passenger payments */}
+        {!isSinglePassenger && (
+          <Card className="mb-6">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3 mb-3">
+                <Users className="h-5 w-5 text-primary" />
+                <h3 className="font-medium">Number of Passengers</h3>
+              </div>
+              <Select value={passengerCount.toString()} onValueChange={(value) => setPassengerCount(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select number of passengers" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+                    <SelectItem key={count} value={count.toString()}>
+                      {count} passenger{count > 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Payment Method Selection */}
         <Card className="mb-6">

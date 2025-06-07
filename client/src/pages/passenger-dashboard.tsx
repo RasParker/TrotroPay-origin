@@ -191,6 +191,7 @@ export default function PassengerDashboard() {
         vehicleId={paymentVehicleId} 
         fareAmount="2.50"
         onBack={() => setShowPaymentFlow(false)} 
+        isSinglePassenger={true}
       />
     );
   }
