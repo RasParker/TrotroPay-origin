@@ -208,7 +208,7 @@ export default function PaymentFlowNew({ vehicleId, fareAmount: propFareAmount, 
           </CardContent>
         </Card>
 
-        {/* Number of Passengers - Hidden for single passenger payments */}
+        {/* Number of Passengers - Show for group payments, hide for single payments */}
         {!isSinglePassenger && (
           <Card className="mb-6">
             <CardContent className="p-4">
