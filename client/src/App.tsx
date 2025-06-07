@@ -9,7 +9,7 @@ import PassengerDashboard from "@/pages/passenger-dashboard";
 import MateDashboard from "@/pages/mate-dashboard";
 import DriverDashboard from "@/pages/driver-dashboard";
 import OwnerDashboard from "@/pages/owner-dashboard";
-import PaymentFlow from "@/pages/payment-flow";
+import PaymentFlowNew from "@/pages/payment-flow-new";
 import PassengerHistory from "@/pages/passenger-history";
 import PassengerProfile from "@/pages/passenger-profile";
 import MateProfile from "@/pages/mate-profile";
@@ -52,9 +52,11 @@ function AppRouter() {
     const vehicleId = location.split("/").pop() || location.replace("#payment/", "");
     console.log("Payment flow detected, vehicleId:", vehicleId);
     return (
-      <PaymentFlow 
+      <PaymentFlowNew 
         vehicleId={vehicleId} 
+        fareAmount="2.50"
         onBack={() => setLocation("/")} 
+        isSinglePassenger={false}
       />
     );
   }

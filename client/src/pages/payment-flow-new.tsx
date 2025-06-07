@@ -17,7 +17,7 @@ interface PaymentFlowProps {
   isSinglePassenger?: boolean;
 }
 
-export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onBack, isSinglePassenger = false }: PaymentFlowProps) {
+export default function PaymentFlowNew({ vehicleId, fareAmount: propFareAmount, onBack, isSinglePassenger = false }: PaymentFlowProps) {
   const [passengerCount, setPassengerCount] = useState(isSinglePassenger ? 1 : 1);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [totalAmount, setTotalAmount] = useState(propFareAmount);
