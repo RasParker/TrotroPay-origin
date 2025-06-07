@@ -307,6 +307,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Top-up wallet endpoint
+  app.post("/api/top-up", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { amount, method } = req.body;
+
+      if (!amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Calculate new balance
+      const currentBalance = parseFloat(user.momoBalance);
+      const topUpAmount = parseFloat(amount);
+      const newBalance = (currentBalance + topUpAmount).toFixed(2);
+
+      // Update user balance
+      await storage.updateUserBalance(user.id, newBalance);
+
+      // Create a transaction record for the top-up
+      await storage.createTransaction({
+        passengerId: user.id,
+        vehicleId: 0, // No vehicle for top-up
+        mateId: 0,
+        driverId: 0,
+        ownerId: 0,
+        amount,
+        destination: "Wallet Top-up",
+        route: "N/A",
+        status: "completed",
+        paymentMethod: method,
+      });
+
+      res.json({ 
+        message: "Top-up successful",
+        newBalance,
+        amount: topUpAmount
+      });
+    } catch (error) {
+      console.error("Top-up error:", error);
+      res.status(500).json({ message: "Top-up failed" });
+    }
+  });
+
   // Dashboard data endpoints
   app.get("/api/dashboard/passenger/:userId", async (req, res) => {
     try {

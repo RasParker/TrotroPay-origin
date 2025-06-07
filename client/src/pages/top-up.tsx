@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, CreditCard, Smartphone, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface TopUpPageProps {
   onBack: () => void;
@@ -13,10 +15,34 @@ interface TopUpPageProps {
 export default function TopUpPage({ onBack }: TopUpPageProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("mtn");
 
   const quickAmounts = ["5.00", "10.00", "20.00", "50.00"];
+
+  const topUpMutation = useMutation({
+    mutationFn: async (topUpData: { amount: string; method: string }) => {
+      return apiRequest("POST", "/api/top-up", topUpData);
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Top Up Successful",
+        description: `Your wallet has been credited with GH₵ ${parseFloat(amount).toFixed(2)}.`,
+      });
+      // Refresh user data and dashboard to show updated balance
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/dashboard/passenger/${user?.id}`] });
+      onBack();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Top Up Failed",
+        description: error.message || "Unable to process top up. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleTopUp = () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -30,17 +56,13 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
 
     toast({
       title: "Top Up Initiated",
-      description: `A USSD prompt will be sent to ${user?.phone} to complete the GH₵ ${parseFloat(amount).toFixed(2)} top up.`,
+      description: `Processing GH₵ ${parseFloat(amount).toFixed(2)} top up via ${selectedMethod.toUpperCase()}...`,
     });
-    
-    // Simulate USSD prompt
-    setTimeout(() => {
-      toast({
-        title: "Top Up Successful",
-        description: `Your wallet has been credited with GH₵ ${parseFloat(amount).toFixed(2)}.`,
-      });
-      onBack();
-    }, 3000);
+
+    topUpMutation.mutate({
+      amount: amount,
+      method: selectedMethod
+    });
   };
 
   const formatAmount = (amount: string) => `GH₵ ${parseFloat(amount).toFixed(2)}`;
