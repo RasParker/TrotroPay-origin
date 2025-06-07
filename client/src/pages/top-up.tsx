@@ -131,57 +131,62 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
 
         {/* Payment Method */}
         <Card>
-          <CardHeader>
-            <CardTitle>Payment Method</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                selectedMethod === "mtn" ? "border-orange-500 bg-orange-50" : "border-border"
-              }`}
-              onClick={() => setSelectedMethod("mtn")}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
-                  <Smartphone className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium">MTN Mobile Money</p>
-                  <p className="text-sm text-muted-foreground">*170#</p>
+          <CardContent className="p-4">
+            <h3 className="font-medium mb-4">Select Payment Method</h3>
+            <div className="space-y-3">
+              <div
+                onClick={() => setSelectedMethod("mtn")}
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selectedMethod === "mtn" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Smartphone className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium">MTN Mobile Money</span>
                 </div>
               </div>
-            </div>
 
-            <div
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                selectedMethod === "vodafone" ? "border-red-500 bg-red-50" : "border-border"
-              }`}
-              onClick={() => setSelectedMethod("vodafone")}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                  <CreditCard className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium">Vodafone Cash</p>
-                  <p className="text-sm text-muted-foreground">*110#</p>
+              <div
+                onClick={() => setSelectedMethod("vodafone")}
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selectedMethod === "vodafone" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Smartphone className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium">Vodafone Cash</span>
                 </div>
               </div>
-            </div>
 
-            <div
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                selectedMethod === "airteltigo" ? "border-blue-500 bg-blue-50" : "border-border"
-              }`}
-              onClick={() => setSelectedMethod("airteltigo")}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                  <Smartphone className="h-5 w-5 text-white" />
+              <div
+                onClick={() => setSelectedMethod("airteltigo")}
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selectedMethod === "airteltigo" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Smartphone className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium">AirtelTigo Money</span>
                 </div>
-                <div>
-                  <p className="font-medium">AirtelTigo Money</p>
-                  <p className="text-sm text-muted-foreground">*100#</p>
+              </div>
+
+              <div
+                onClick={() => setSelectedMethod("card")}
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selectedMethod === "card" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium">Credit/Debit Card</span>
                 </div>
               </div>
             </div>
