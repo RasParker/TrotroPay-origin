@@ -12,7 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PaymentFlow from "@/pages/payment-flow-new";
+import PaymentFlowNew from "@/pages/payment-flow-new";
 
 
 export default function PassengerDashboard() {
@@ -126,8 +126,9 @@ export default function PassengerDashboard() {
 
   const handleQRScan = (vehicleId: string) => {
     setShowQRScanner(false);
-    // Navigate to payment flow with the scanned vehicle ID
-    setLocation(`#payment/${vehicleId}`);
+    // Navigate to payment flow with the scanned vehicle ID and default single passenger
+    setPaymentVehicleId(vehicleId);
+    setShowPaymentFlow(true);
   };
 
   const handleManualEntry = () => {
@@ -140,7 +141,9 @@ export default function PassengerDashboard() {
       return;
     }
     setShowManualEntry(false);
-    setLocation(`#payment/${manualVehicleId}`);
+    // Navigate to payment flow with manual vehicle ID and default single passenger
+    setPaymentVehicleId(manualVehicleId);
+    setShowPaymentFlow(true);
   };
 
   const formatAmount = (amount: string) => `GH₵ ${parseFloat(amount).toFixed(2)}`;
@@ -184,8 +187,9 @@ export default function PassengerDashboard() {
   // Show payment flow if requested
   if (showPaymentFlow) {
     return (
-      <PaymentFlow 
+      <PaymentFlowNew 
         vehicleId={paymentVehicleId} 
+        fareAmount="2.50"
         onBack={() => setShowPaymentFlow(false)} 
       />
     );

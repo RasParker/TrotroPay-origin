@@ -12,14 +12,15 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface PaymentFlowProps {
   vehicleId: string;
+  fareAmount: string;
   onBack: () => void;
+  isSinglePassenger?: boolean;
 }
 
-export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
-  const [passengerCount, setPassengerCount] = useState(1);
+export default function PaymentFlow({ vehicleId, fareAmount: propFareAmount, onBack, isSinglePassenger = false }: PaymentFlowProps) {
+  const [passengerCount, setPassengerCount] = useState(isSinglePassenger ? 1 : 1);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [fareAmount] = useState("2.50");
-  const [totalAmount, setTotalAmount] = useState("2.50");
+  const [totalAmount, setTotalAmount] = useState(fareAmount);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showInsufficientBalance, setShowInsufficientBalance] = useState(false);
   const { user } = useAuth();
