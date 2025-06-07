@@ -21,6 +21,7 @@ export default function PassengerDashboard() {
   const [manualVehicleId, setManualVehicleId] = useState("");
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
   const [paymentVehicleId, setPaymentVehicleId] = useState("");
+  const [isSinglePassengerPayment, setIsSinglePassengerPayment] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoute, setSelectedRoute] = useState("");
   const [selectedBoardingStop, setSelectedBoardingStop] = useState("");
@@ -128,6 +129,7 @@ export default function PassengerDashboard() {
     setShowQRScanner(false);
     // Navigate to payment flow with the scanned vehicle ID and default single passenger
     setPaymentVehicleId(vehicleId);
+    setIsSinglePassengerPayment(true);
     setShowPaymentFlow(true);
   };
 
@@ -143,6 +145,7 @@ export default function PassengerDashboard() {
     setShowManualEntry(false);
     // Navigate to payment flow with manual vehicle ID and default single passenger
     setPaymentVehicleId(manualVehicleId);
+    setIsSinglePassengerPayment(true);
     setShowPaymentFlow(true);
   };
 
@@ -191,7 +194,7 @@ export default function PassengerDashboard() {
         vehicleId={paymentVehicleId} 
         fareAmount="2.50"
         onBack={() => setShowPaymentFlow(false)} 
-        isSinglePassenger={true}
+        isSinglePassenger={isSinglePassengerPayment}
       />
     );
   }
@@ -427,6 +430,7 @@ export default function PassengerDashboard() {
               <Button
                 onClick={() => {
                   setPaymentVehicleId("GT-1234-20");
+                  setIsSinglePassengerPayment(false);
                   setShowPaymentFlow(true);
                 }}
                 className="w-full h-14 bg-green-600 hover:bg-green-700 text-white"
