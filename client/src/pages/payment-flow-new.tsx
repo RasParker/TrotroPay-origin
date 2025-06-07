@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Users, CreditCard, Smartphone, CheckCircle } from "lucide-react";
+import { ArrowLeft, Users, CreditCard, Smartphone, CheckCircle, AlertCircle, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,9 +21,11 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const [fareAmount] = useState("2.50");
   const [totalAmount, setTotalAmount] = useState("2.50");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showInsufficientBalance, setShowInsufficientBalance] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
 
   // Payment methods available
   const paymentMethods = [
@@ -50,11 +53,15 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
       queryClient.invalidateQueries({ queryKey: [`/api/dashboard/passenger/${user?.id}`] });
     },
     onError: (error: any) => {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Unable to process payment",
-        variant: "destructive",
-      });
+      if (error.message === "Insufficient balance") {
+        setShowInsufficientBalance(true);
+      } else {
+        toast({
+          title: "Payment Failed",
+          description: error.message || "Unable to process payment",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -93,6 +100,31 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
             <Button onClick={onBack} className="w-full">
               Done
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (showInsufficientBalance) {
+    return (
+      <Dialog open={showInsufficientBalance} onOpenChange={() => setShowInsufficientBalance(false)}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center py-6">
+            <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Insufficient Balance</h2>
+            <p className="text-center text-muted-foreground mb-4">
+              You need {formatAmount(totalAmount)} to complete this payment. Your current balance is too low.
+            </p>
+            <div className="space-y-3 w-full">
+              <Button onClick={() => setLocation("/top-up")} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Top Up Wallet
+              </Button>
+              <Button variant="outline" onClick={onBack} className="w-full">
+                Go Back
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

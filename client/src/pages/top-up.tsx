@@ -166,71 +166,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
           </CardContent>
         </Card>
 
-        {/* Search Trip Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Search className="h-5 w-5" />
-              <span>Search Trip</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search routes (e.g., 192, Circle - Lapaz, Tema)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {searchQuery && filteredRoutes.length > 0 && (
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-foreground">
-                  Search Results
-                </label>
-                <div className="space-y-2">
-                  {filteredRoutes.map((route: any) => (
-                    <div
-                      key={route.id}
-                      onClick={() => handleRouteSearch(route.id.toString())}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
-                        selectedRoute === route.id.toString() ? "border-primary bg-primary/5" : "border-border"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-bold text-primary text-lg">{route.code}</span>
-                        <span className="font-medium">{route.name}</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground ml-7">
-                        {route.startPoint} → {route.endPoint}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {searchQuery && filteredRoutes.length === 0 && (
-              <div className="p-3 text-center text-muted-foreground">
-                No routes found for "{searchQuery}"
-              </div>
-            )}
-
-            {selectedRoute && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-800">
-                    Route selected! You can now look for vehicles on this route or calculate fares.
-                  </span>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
         {/* Top Up Button */}
         <Button
