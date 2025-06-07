@@ -76,8 +76,8 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h2 className="font-medium">Top Up Wallet</h2>
-            <p className="text-blue-200 text-sm">Add money to your account</p>
+            <h2 className="text-heading-2">Top Up Wallet</h2>
+            <p className="text-body text-blue-200">Add money to your account</p>
           </div>
         </div>
       </div>
@@ -86,9 +86,9 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
         {/* Current Balance */}
         <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
           <CardContent className="p-4 text-center">
-            <p className="text-blue-100 text-sm">Current Balance</p>
-            <div className="text-3xl font-bold">
-              <span className="text-lg mr-1">GH₵</span>
+            <p className="text-caption text-blue-100">Current Balance</p>
+            <div className="text-display">
+              <span className="text-heading-3 mr-1">GH₵</span>
               <span>{parseFloat(user?.momoBalance || "0").toFixed(2)}</span>
             </div>
           </CardContent>

@@ -188,8 +188,8 @@ export default function PassengerDashboard() {
       <div className="gradient-primary text-white p-4">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="font-medium">Hello, {userData?.name || "Passenger"}</h2>
-            <p className="text-green-200 text-sm">Ready for your journey?</p>
+            <h2 className="text-heading-2 text-white">Hello, {userData?.name || "Passenger"}</h2>
+            <p className="text-body text-green-200">Ready for your journey?</p>
           </div>
           <div className="flex items-center space-x-3">
             <Button 
@@ -218,8 +218,8 @@ export default function PassengerDashboard() {
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-blue-100 text-sm">Wallet Balance</p>
-                <p className="text-2xl font-bold">
+                <p className="text-caption text-blue-100">Wallet Balance</p>
+                <p className="text-display text-white">
                   {formatAmount(userData?.momoBalance || "0")}
                 </p>
               </div>
@@ -241,13 +241,13 @@ export default function PassengerDashboard() {
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-4">
               <Search className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-medium">Book Your Trip</h3>
+              <h3 className="text-heading-3">Book Your Trip</h3>
             </div>
             
             {/* Step 1: Route Selection */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">1. Select Route</label>
+                <label className="block text-label mb-2">1. Select Route</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -270,10 +270,10 @@ export default function PassengerDashboard() {
                       >
                         <div className="flex items-center space-x-3">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-bold text-primary text-lg">{route.code}</span>
-                          <span className="font-medium">{route.name}</span>
+                          <span className="text-heading-3 text-primary">{route.code}</span>
+                          <span className="text-label">{route.name}</span>
                         </div>
-                        <div className="text-sm text-muted-foreground ml-7">
+                        <div className="text-body text-muted-foreground ml-7">
                           {route.startPoint} → {route.endPoint}
                         </div>
                       </div>
