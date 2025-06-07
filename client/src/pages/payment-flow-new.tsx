@@ -28,14 +28,44 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const [location, setLocation] = useLocation();
 
   // Get user data to check wallet balance
-  const { data: userData } = useQuery({
+  const { data: userData, refetch: refetchUserData } = useQuery({
     queryKey: ["/api/auth/me"],
     enabled: !!user?.id,
+    staleTime: 0, // Always fetch fresh data
   });
+
+  // Refresh user data when component mounts or when returning from top-up
+  useEffect(() => {
+    if (user?.id) {
+      refetchUserData();
+    }
+  }, [user?.id, refetchUserData]);
+
+  // Also refresh when component becomes visible again (e.g., returning from top-up)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id) {
+        refetchUserData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user?.id, refetchUserData]);
 
   const currentBalance = parseFloat((userData as any)?.momoBalance || "0");
   const paymentAmount = parseFloat(totalAmount);
   const hasInsufficientBalance = currentBalance < paymentAmount;
+
+  // Debug logging to identify balance calculation issues
+  console.log("Payment Flow Debug:", {
+    currentBalance,
+    paymentAmount,
+    totalAmount,
+    hasInsufficientBalance,
+    userData: userData,
+    userBalance: (userData as any)?.momoBalance
+  });
 
   const formatAmount = (amount: string) => {
     return `GH₵ ${parseFloat(amount).toFixed(2)}`;
