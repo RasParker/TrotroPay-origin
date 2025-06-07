@@ -234,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const { vehicleId, destination, amount, passengerCount = 1 } = req.body;
+      const { vehicleId, destination = "General Transit", amount, passengerCount = 1 } = req.body;
       
       // Get passenger
       const passenger = await storage.getUser(req.session.userId);
@@ -265,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ownerId: vehicle.ownerId || 0,
         amount,
         destination,
-        route: vehicle.route,
+        route: vehicle.route || "Unknown Route",
         status: "completed",
         paymentMethod: "momo",
       });
@@ -408,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endPoint,
         distance: parseFloat(distance),
         stops: [startPoint, endPoint], // Start with basic stops
-        fares: [0, 2.0] // Default fare structure
+        fares: ["0.00", "2.00"] // Default fare structure
       });
 
       res.json({
