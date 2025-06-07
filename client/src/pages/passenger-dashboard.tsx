@@ -11,7 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PaymentFlow from "@/pages/payment-flow";
+
 
 export default function PassengerDashboard() {
   const [showQRScanner, setShowQRScanner] = useState(false);
@@ -21,6 +23,9 @@ export default function PassengerDashboard() {
   const [paymentVehicleId, setPaymentVehicleId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoute, setSelectedRoute] = useState("");
+  const [selectedBoardingStop, setSelectedBoardingStop] = useState("");
+  const [selectedAlightingStop, setSelectedAlightingStop] = useState("");
+  const [calculatedFare, setCalculatedFare] = useState<any>(null);
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -52,10 +57,35 @@ export default function PassengerDashboard() {
     const route = routes?.find((r: any) => r.id.toString() === routeId);
     if (route) {
       setSelectedRoute(routeId);
-      toast({
-        title: "Route Selected",
-        description: `You selected Route ${route.code} - ${route.name}. Check nearby vehicles or use the fare calculator.`,
-      });
+      // Reset subsequent steps when route changes
+      setSelectedBoardingStop("");
+      setSelectedAlightingStop("");
+      setCalculatedFare(null);
+    }
+  };
+
+  const handleBoardingStopSelect = (stop: string) => {
+    setSelectedBoardingStop(stop);
+    // Reset subsequent steps when boarding stop changes
+    setSelectedAlightingStop("");
+    setCalculatedFare(null);
+  };
+
+  const handleAlightingStopSelect = (stop: string) => {
+    setSelectedAlightingStop(stop);
+    
+    // Calculate fare when both stops are selected
+    const route = routes?.find((r: any) => r.id.toString() === selectedRoute);
+    if (route && selectedBoardingStop && stop) {
+      const fareCalculation = calculateFare(
+        route.name,
+        route.stops || [],
+        selectedBoardingStop,
+        stop,
+        route.baseFare || 2.5,
+        route.farePerKm || 0.5
+      );
+      setCalculatedFare(fareCalculation);
     }
   };
 
@@ -180,74 +210,126 @@ export default function PassengerDashboard() {
           </CardContent>
         </Card>
 
-        {/* Search Trip Section */}
+        {/* Progressive Trip Search and Payment Flow */}
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-4">
               <Search className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-medium">Search Trip</h3>
+              <h3 className="text-lg font-medium">Book Your Trip</h3>
             </div>
             
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search routes (e.g., 192, Circle - Lapaz, Tema)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {searchQuery && filteredRoutes.length > 0 && (
-              <div className="space-y-2 mt-4">
-                <label className="block text-sm font-medium text-foreground">
-                  Search Results
-                </label>
-                <div className="space-y-2">
-                  {filteredRoutes.map((route: any) => (
-                    <div
-                      key={route.id}
-                      onClick={() => handleRouteSearch(route.id.toString())}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
-                        selectedRoute === route.id.toString() ? "border-primary bg-primary/5" : "border-border"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-bold text-primary text-lg">{route.code}</span>
-                        <span className="font-medium">{route.name}</span>
+            {/* Step 1: Route Selection */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">1. Select Route</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search routes (e.g., 192, Circle - Lapaz, Tema)"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                {searchQuery && filteredRoutes.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {filteredRoutes.map((route: any) => (
+                      <div
+                        key={route.id}
+                        onClick={() => handleRouteSearch(route.id.toString())}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
+                          selectedRoute === route.id.toString() ? "border-primary bg-primary/5" : "border-border"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-bold text-primary text-lg">{route.code}</span>
+                          <span className="font-medium">{route.name}</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground ml-7">
+                          {route.startPoint} → {route.endPoint}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground ml-7">
-                        {route.startPoint} → {route.endPoint}
-                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {searchQuery && filteredRoutes.length === 0 && (
+                  <div className="p-3 text-center text-muted-foreground mt-2">
+                    No routes found for "{searchQuery}"
+                  </div>
+                )}
+              </div>
+
+              {/* Step 2: Boarding Stop Selection */}
+              {selectedRoute && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">2. Select Boarding Stop</label>
+                  <Select value={selectedBoardingStop} onValueChange={handleBoardingStopSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose where you'll board" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(() => {
+                        const route = routes?.find((r: any) => r.id.toString() === selectedRoute);
+                        const stops = route?.stops || [];
+                        return stops.map((stop: string, index: number) => (
+                          <SelectItem key={index} value={stop}>
+                            {stop}
+                          </SelectItem>
+                        ));
+                      })()}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Step 3: Alighting Stop Selection */}
+              {selectedRoute && selectedBoardingStop && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">3. Select Alighting Stop</label>
+                  <Select value={selectedAlightingStop} onValueChange={handleAlightingStopSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose where you'll get off" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(() => {
+                        const route = routes?.find((r: any) => r.id.toString() === selectedRoute);
+                        const validStops = getValidStops(route?.stops || [], selectedBoardingStop);
+                        return validStops.map((stop: string, index: number) => (
+                          <SelectItem key={index} value={stop}>
+                            {stop}
+                          </SelectItem>
+                        ));
+                      })()}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Step 4: Fare Display */}
+              {calculatedFare && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-sm text-blue-600 mb-1">Total Fare</div>
+                    <div className="text-2xl font-bold text-blue-900">
+                      GH₵ {formatFareAmount(calculatedFare.amount)}
                     </div>
-                  ))}
+                    <div className="text-sm text-blue-600 mt-1">
+                      {calculatedFare.boardingStop} → {calculatedFare.alightingStop}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {searchQuery && filteredRoutes.length === 0 && (
-              <div className="p-3 text-center text-muted-foreground mt-4">
-                No routes found for "{searchQuery}"
-              </div>
-            )}
-
-            {selectedRoute && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg mt-4">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-800">
-                    Route selected! You can now look for vehicles on this route or calculate fares.
-                  </span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Payment Options */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-4">Choose Payment Type</h3>
+        {/* Payment Options - Only show when fare is calculated */}
+        {calculatedFare && (
+          <div className="mb-6">
+            <h3 className="text-lg font-medium mb-4">4. Choose Payment Type</h3>
           
           {/* Self Payment */}
           <Card className="mb-4 border-blue-200 bg-blue-50/50">
@@ -316,7 +398,8 @@ export default function PassengerDashboard() {
               </Button>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
 
         {/* Recent Trips */}
         <div className="mb-6">
