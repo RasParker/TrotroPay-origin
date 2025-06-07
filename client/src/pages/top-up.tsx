@@ -97,7 +97,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
         {/* Amount Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Select Amount</CardTitle>
+            <CardTitle className="text-heading-3">Select Amount</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -132,7 +132,7 @@ export default function TopUpPage({ onBack }: TopUpPageProps) {
         {/* Payment Method */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-medium mb-4">Select Payment Method</h3>
+            <h3 className="text-heading-3 mb-4">Select Payment Method</h3>
             <div className="space-y-3">
               <div
                 onClick={() => setSelectedMethod("mtn")}

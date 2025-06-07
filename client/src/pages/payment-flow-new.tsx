@@ -129,7 +129,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
         <DialogContent className="sm:max-w-md">
           <div className="flex flex-col items-center justify-center py-6">
             <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Insufficient Balance</h2>
+            <h2 className="text-heading-2 mb-2">Insufficient Balance</h2>
             <p className="text-center text-muted-foreground mb-4">
               You need {formatAmount(totalAmount)} to complete this payment. Your current balance is too low.
             </p>
@@ -156,13 +156,13 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold ml-2">Complete Payment</h1>
+          <h1 className="text-heading-2 ml-2">Complete Payment</h1>
         </div>
 
         {/* Trip Summary */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">Trip Summary</CardTitle>
+            <CardTitle className="text-heading-3">Trip Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -211,7 +211,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
         {/* Payment Method Selection */}
         <Card className="mb-6">
           <CardContent className="p-4">
-            <h3 className="font-medium mb-4">Select Payment Method</h3>
+            <h3 className="text-heading-3 mb-4">Select Payment Method</h3>
             <div className="space-y-3">
               {paymentMethods.map((method) => {
                 const IconComponent = method.icon;
