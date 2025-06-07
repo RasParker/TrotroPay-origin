@@ -333,19 +333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user balance
       await storage.updateUserBalance(user.id, newBalance);
 
-      // Create a transaction record for the top-up
-      await storage.createTransaction({
-        passengerId: user.id,
-        vehicleId: 0, // No vehicle for top-up
-        mateId: 0,
-        driverId: 0,
-        ownerId: 0,
-        amount,
-        destination: "Wallet Top-up",
-        route: "N/A",
-        status: "completed",
-        paymentMethod: method,
-      });
+      // Update user balance without creating a transaction record
+      // Top-ups don't need transaction records since they're not related to vehicle trips
 
       res.json({ 
         message: "Top-up successful",
