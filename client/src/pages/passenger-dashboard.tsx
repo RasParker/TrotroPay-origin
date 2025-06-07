@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -31,10 +31,19 @@ export default function PassengerDashboard() {
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
 
-  const { data: dashboardData, isLoading } = useQuery({
+  const { data: dashboardData, isLoading, refetch } = useQuery({
     queryKey: [`/api/dashboard/passenger/${user?.id}`],
     enabled: !!user?.id,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache this data (TanStack Query v5)
   });
+
+  // Refetch dashboard data when component mounts or becomes visible
+  useEffect(() => {
+    if (user?.id) {
+      refetch();
+    }
+  }, [user?.id, refetch]);
 
   // Fetch all routes for search
   const { data: routes } = useQuery({
