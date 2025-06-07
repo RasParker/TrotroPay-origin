@@ -16,14 +16,11 @@ interface PaymentFlowProps {
 }
 
 export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
-  const [boardingStop, setBoardingStop] = useState("");
-  const [alightingStop, setAlightingStop] = useState("");
-  const [selectedDestination, setSelectedDestination] = useState("");
-  const [fareAmount, setFareAmount] = useState("0.00");
   const [passengerCount, setPassengerCount] = useState(1);
-  const [totalAmount, setTotalAmount] = useState("0.00");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [fareAmount, setFareAmount] = useState("2.50");
+  const [totalAmount, setTotalAmount] = useState("2.50");
   const [showSuccess, setShowSuccess] = useState(false);
-  const [fareCalculation, setFareCalculation] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -46,41 +43,20 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
     enabled: !!vehicle?.route,
   });
 
-  // Fare calculation mutation
-  const fareCalculationMutation = useMutation({
-    mutationFn: async ({ routeId, boardingStop, alightingStop }: { 
-      routeId: number; 
-      boardingStop: string; 
-      alightingStop: string; 
-    }) => {
-      return apiRequest('POST', `/api/routes/${routeId}/calculate-fare`, {
-        boardingStop,
-        alightingStop
-      });
-    },
-    onSuccess: (data) => {
-      setFareCalculation(data);
-      setFareAmount(data.amount.toFixed(2));
-      const total = (data.amount * passengerCount).toFixed(2);
-      setTotalAmount(total);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Fare Calculation Error",
-        description: error.message || "Failed to calculate fare",
-        variant: "destructive",
-      });
-    },
-  });
+  // Update total when passenger count changes
+  useEffect(() => {
+    const fare = parseFloat(fareAmount);
+    const total = (fare * passengerCount).toFixed(2);
+    setTotalAmount(total);
+  }, [fareAmount, passengerCount]);
 
   const paymentMutation = useMutation({
-    mutationFn: async (paymentData: { vehicleId: string; destination: string; amount: string; passengerCount?: number }) => {
+    mutationFn: async (paymentData: { vehicleId: string; amount: string; passengerCount: number; paymentMethod: string }) => {
       const response = await apiRequest("POST", "/api/payments/process", paymentData);
       return response.json();
     },
     onSuccess: (data) => {
       setShowSuccess(true);
-      // Update user balance in auth context
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       queryClient.invalidateQueries({ queryKey: [`/api/dashboard/passenger/${user?.id}`] });
     },

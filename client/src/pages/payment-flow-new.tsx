@@ -1,0 +1,205 @@
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Users, CreditCard, Smartphone, CheckCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+interface PaymentFlowProps {
+  vehicleId: string;
+  onBack: () => void;
+}
+
+export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
+  const [passengerCount, setPassengerCount] = useState(1);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [fareAmount] = useState("2.50");
+  const [totalAmount, setTotalAmount] = useState("2.50");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Payment methods available
+  const paymentMethods = [
+    { id: "mtn", name: "MTN Mobile Money", icon: Smartphone },
+    { id: "vodafone", name: "Vodafone Cash", icon: Smartphone },
+    { id: "airteltigo", name: "AirtelTigo Money", icon: Smartphone },
+    { id: "card", name: "Credit/Debit Card", icon: CreditCard }
+  ];
+
+  // Update total when passenger count changes
+  useEffect(() => {
+    const fare = parseFloat(fareAmount);
+    const total = (fare * passengerCount).toFixed(2);
+    setTotalAmount(total);
+  }, [fareAmount, passengerCount]);
+
+  const paymentMutation = useMutation({
+    mutationFn: async (paymentData: { vehicleId: string; amount: string; passengerCount: number; paymentMethod: string }) => {
+      const response = await apiRequest("POST", "/api/payments/process", paymentData);
+      return response;
+    },
+    onSuccess: () => {
+      setShowSuccess(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/dashboard/passenger/${user?.id}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Unable to process payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePayment = () => {
+    if (!selectedPaymentMethod) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a payment method",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    paymentMutation.mutate({
+      vehicleId: vehicleId,
+      amount: totalAmount,
+      passengerCount: passengerCount,
+      paymentMethod: selectedPaymentMethod
+    });
+  };
+
+  const formatAmount = (amount: string) => {
+    return `GH₵ ${parseFloat(amount).toFixed(2)}`;
+  };
+
+  if (showSuccess) {
+    return (
+      <Dialog open={showSuccess} onOpenChange={() => setShowSuccess(false)}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center py-6">
+            <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Payment Successful!</h2>
+            <p className="text-center text-muted-foreground mb-4">
+              Your payment of {formatAmount(totalAmount)} has been processed successfully.
+            </p>
+            <Button onClick={onBack} className="w-full">
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-md mx-auto">
+        {/* Header */}
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" size="icon" onClick={onBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold ml-2">Complete Payment</h1>
+        </div>
+
+        {/* Trip Summary */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Trip Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Vehicle ID:</span>
+                <span className="font-medium">{vehicleId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Fare per person:</span>
+                <span className="font-medium">{formatAmount(fareAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Number of passengers:</span>
+                <span className="font-medium">{passengerCount}</span>
+              </div>
+              <div className="border-t pt-3 flex justify-between text-lg font-semibold">
+                <span>Total Amount:</span>
+                <span className="text-primary">{formatAmount(totalAmount)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Number of Passengers */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3 mb-3">
+              <Users className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Number of Passengers</h3>
+            </div>
+            <Select value={passengerCount.toString()} onValueChange={(value) => setPassengerCount(parseInt(value))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select number of passengers" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+                  <SelectItem key={count} value={count.toString()}>
+                    {count} passenger{count > 1 ? 's' : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+
+        {/* Payment Method Selection */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <h3 className="font-medium mb-4">Select Payment Method</h3>
+            <div className="space-y-3">
+              {paymentMethods.map((method) => {
+                const IconComponent = method.icon;
+                return (
+                  <div
+                    key={method.id}
+                    onClick={() => setSelectedPaymentMethod(method.id)}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedPaymentMethod === method.id 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <IconComponent className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">{method.name}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pay Button */}
+        <Button
+          onClick={handlePayment}
+          disabled={!selectedPaymentMethod || paymentMutation.isPending}
+          className="w-full h-14 text-lg font-semibold"
+        >
+          {paymentMutation.isPending ? (
+            "Processing..."
+          ) : (
+            `Pay ${formatAmount(totalAmount)}`
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}

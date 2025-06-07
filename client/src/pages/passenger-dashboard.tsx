@@ -12,7 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PaymentFlow from "@/pages/payment-flow";
+import PaymentFlow from "@/pages/payment-flow-new";
 
 
 export default function PassengerDashboard() {
