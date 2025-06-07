@@ -53,19 +53,9 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user?.id, refetchUserData]);
 
-  const currentBalance = parseFloat((userData as any)?.momoBalance || "0");
+  const currentBalance = parseFloat((userData as any)?.user?.momoBalance || "0");
   const paymentAmount = parseFloat(totalAmount);
   const hasInsufficientBalance = currentBalance < paymentAmount;
-
-  // Debug logging to identify balance calculation issues
-  console.log("Payment Flow Debug:", {
-    currentBalance,
-    paymentAmount,
-    totalAmount,
-    hasInsufficientBalance,
-    userData: userData,
-    userBalance: (userData as any)?.momoBalance
-  });
 
   const formatAmount = (amount: string) => {
     return `GH₵ ${parseFloat(amount).toFixed(2)}`;
@@ -77,7 +67,7 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
       id: "wallet", 
       name: "Wallet Balance", 
       icon: Wallet,
-      balance: formatAmount((userData as any)?.momoBalance || "0"),
+      balance: formatAmount((userData as any)?.user?.momoBalance || "0"),
       insufficient: hasInsufficientBalance
     },
     { id: "mtn", name: "MTN Mobile Money", icon: Smartphone },
