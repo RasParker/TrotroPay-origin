@@ -46,15 +46,15 @@ export default function PassengerDashboard() {
   const recentTransactions = (dashboardData as any)?.recentTransactions || [];
 
   // Filter routes based on search query
-  const filteredRoutes = routes?.filter((route: any) => 
+  const filteredRoutes = Array.isArray(routes) ? routes.filter((route: any) => 
     route.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     route.startPoint?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     route.endPoint?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  ) : [];
 
   const handleRouteSearch = (routeId: string) => {
-    const route = routes?.find((r: any) => r.id.toString() === routeId);
+    const route = Array.isArray(routes) ? routes.find((r: any) => r.id.toString() === routeId) : null;
     if (route) {
       setSelectedRoute(routeId);
       // Reset subsequent steps when route changes
@@ -71,20 +71,46 @@ export default function PassengerDashboard() {
     setCalculatedFare(null);
   };
 
+  // Custom fare calculation function
+  const calculateTripFare = (route: any, boardingStop: string, alightingStop: string) => {
+    const stops = route.stops || [];
+    const boardingIndex = stops.indexOf(boardingStop);
+    const alightingIndex = stops.indexOf(alightingStop);
+    
+    if (boardingIndex === -1 || alightingIndex === -1 || boardingIndex >= alightingIndex) {
+      return null;
+    }
+    
+    const distance = alightingIndex - boardingIndex;
+    const baseFare = route.baseFare || 2.5;
+    const farePerStop = route.farePerKm || 0.3;
+    const amount = baseFare + (distance * farePerStop);
+    
+    return {
+      amount,
+      boardingStop,
+      alightingStop,
+      distance,
+      route: route.name
+    };
+  };
+
+  const formatFareAmount = (amount: number) => {
+    return amount.toFixed(2);
+  };
+
+  const getValidStops = (stops: string[], boardingStop: string) => {
+    const boardingIndex = stops.indexOf(boardingStop);
+    return boardingIndex !== -1 ? stops.slice(boardingIndex + 1) : [];
+  };
+
   const handleAlightingStopSelect = (stop: string) => {
     setSelectedAlightingStop(stop);
     
     // Calculate fare when both stops are selected
-    const route = routes?.find((r: any) => r.id.toString() === selectedRoute);
+    const route = (routes as any[])?.find((r: any) => r.id.toString() === selectedRoute);
     if (route && selectedBoardingStop && stop) {
-      const fareCalculation = calculateFare(
-        route.name,
-        route.stops || [],
-        selectedBoardingStop,
-        stop,
-        route.baseFare || 2.5,
-        route.farePerKm || 0.5
-      );
+      const fareCalculation = calculateTripFare(route, selectedBoardingStop, stop);
       setCalculatedFare(fareCalculation);
     }
   };
@@ -272,7 +298,7 @@ export default function PassengerDashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       {(() => {
-                        const route = routes?.find((r: any) => r.id.toString() === selectedRoute);
+                        const route = Array.isArray(routes) ? routes.find((r: any) => r.id.toString() === selectedRoute) : null;
                         const stops = route?.stops || [];
                         return stops.map((stop: string, index: number) => (
                           <SelectItem key={index} value={stop}>
@@ -295,7 +321,7 @@ export default function PassengerDashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       {(() => {
-                        const route = routes?.find((r: any) => r.id.toString() === selectedRoute);
+                        const route = Array.isArray(routes) ? routes.find((r: any) => r.id.toString() === selectedRoute) : null;
                         const validStops = getValidStops(route?.stops || [], selectedBoardingStop);
                         return validStops.map((stop: string, index: number) => (
                           <SelectItem key={index} value={stop}>
