@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Users, CreditCard, Smartphone, CheckCircle, AlertCircle, Plus } from "lucide-react";
+import { ArrowLeft, Users, CreditCard, Smartphone, CheckCircle, AlertCircle, Plus, Wallet } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,8 +27,29 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
 
+  // Get user data to check wallet balance
+  const { data: userData } = useQuery({
+    queryKey: ["/api/auth/me"],
+    enabled: !!user?.id,
+  });
+
+  const currentBalance = parseFloat((userData as any)?.momoBalance || "0");
+  const paymentAmount = parseFloat(totalAmount);
+  const hasInsufficientBalance = currentBalance < paymentAmount;
+
+  const formatAmount = (amount: string) => {
+    return `GH₵ ${parseFloat(amount).toFixed(2)}`;
+  };
+
   // Payment methods available
   const paymentMethods = [
+    { 
+      id: "wallet", 
+      name: "Wallet Balance", 
+      icon: Wallet,
+      balance: formatAmount((userData as any)?.momoBalance || "0"),
+      insufficient: hasInsufficientBalance
+    },
     { id: "mtn", name: "MTN Mobile Money", icon: Smartphone },
     { id: "vodafone", name: "Vodafone Cash", icon: Smartphone },
     { id: "airteltigo", name: "AirtelTigo Money", icon: Smartphone },
@@ -81,10 +102,6 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
       passengerCount: passengerCount,
       paymentMethod: selectedPaymentMethod
     });
-  };
-
-  const formatAmount = (amount: string) => {
-    return `GH₵ ${parseFloat(amount).toFixed(2)}`;
   };
 
   if (showSuccess) {
@@ -198,19 +215,46 @@ export default function PaymentFlow({ vehicleId, onBack }: PaymentFlowProps) {
             <div className="space-y-3">
               {paymentMethods.map((method) => {
                 const IconComponent = method.icon;
+                const isWallet = method.id === "wallet";
+                const isDisabled = isWallet && method.insufficient;
+                
                 return (
                   <div
                     key={method.id}
-                    onClick={() => setSelectedPaymentMethod(method.id)}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedPaymentMethod === method.id 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:bg-gray-50"
+                    onClick={() => !isDisabled && setSelectedPaymentMethod(method.id)}
+                    className={`p-3 border rounded-lg transition-colors ${
+                      isDisabled
+                        ? "border-red-200 bg-red-50 cursor-not-allowed"
+                        : selectedPaymentMethod === method.id 
+                          ? "border-primary bg-primary/5 cursor-pointer" 
+                          : "border-border hover:bg-gray-50 cursor-pointer"
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <IconComponent className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium">{method.name}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <IconComponent className={`h-5 w-5 ${
+                          isDisabled ? "text-red-400" : "text-muted-foreground"
+                        }`} />
+                        <span className={`font-medium ${
+                          isDisabled ? "text-red-600" : ""
+                        }`}>
+                          {method.name}
+                        </span>
+                      </div>
+                      {isWallet && (
+                        <div className="text-right">
+                          <div className={`text-sm font-medium ${
+                            isDisabled ? "text-red-600" : "text-foreground"
+                          }`}>
+                            {method.balance}
+                          </div>
+                          {isDisabled && (
+                            <div className="text-xs text-red-500">
+                              Insufficient funds
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
