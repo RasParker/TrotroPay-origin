@@ -461,7 +461,7 @@ export default function PassengerDashboard() {
 
           <div className="bg-white rounded-lg border border-border overflow-hidden">
             {recentTransactions.length > 0 ? (
-              <div className="max-h-64 overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto">
                 <div className="divide-y divide-border">
                   {recentTransactions.map((transaction: any, index: number) => (
                     <div key={transaction.id} className="p-4 hover:bg-gray-50 transition-colors">
