@@ -459,48 +459,46 @@ export default function PassengerDashboard() {
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="bg-white rounded-lg border border-border overflow-hidden">
             {recentTransactions.length > 0 ? (
-              recentTransactions.map((transaction: any) => (
-                <Card key={transaction.id} className="border border-border">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <div className="w-3 h-3 bg-success rounded-full"></div>
-                          <span className="font-medium text-foreground">
+              <div className="divide-y divide-border">
+                {recentTransactions.map((transaction: any, index: number) => (
+                  <div key={transaction.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-success rounded-full"></div>
+                        <div>
+                          <p className="text-body font-medium text-foreground">
                             {transaction.route}
-                          </span>
+                          </p>
+                          <p className="text-small text-muted-foreground">
+                            → {transaction.destination}
+                          </p>
+                          <p className="text-caption text-muted-foreground">
+                            {formatDate(transaction.createdAt)}, {formatTime(transaction.createdAt)}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          → {transaction.destination}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(transaction.createdAt)}, {formatTime(transaction.createdAt)}
-                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-foreground">
+                        <p className="text-body font-semibold text-foreground">
                           {formatAmount(transaction.amount)}
                         </p>
-                        <Badge variant="secondary" className="text-xs bg-green-100 text-success">
+                        <Badge variant="secondary" className="text-caption bg-green-100 text-success mt-1">
                           Paid
                         </Badge>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                  </div>
+                ))}
+              </div>
             ) : (
-              <Card className="border-dashed border-2">
-                <CardContent className="p-8 text-center">
-                  <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No trips yet</p>
-                  <p className="text-sm text-muted-foreground">
-                    Start by scanning a QR code or entering a Trotro ID
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="p-8 text-center">
+                <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-body text-muted-foreground">No trips yet</p>
+                <p className="text-small text-muted-foreground">
+                  Start by scanning a QR code or entering a Trotro ID
+                </p>
+              </div>
             )}
           </div>
         </div>
