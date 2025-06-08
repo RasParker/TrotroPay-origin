@@ -461,35 +461,37 @@ export default function PassengerDashboard() {
 
           <div className="bg-white rounded-lg border border-border overflow-hidden">
             {recentTransactions.length > 0 ? (
-              <div className="divide-y divide-border">
-                {recentTransactions.map((transaction: any, index: number) => (
-                  <div key={transaction.id} className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-success rounded-full"></div>
-                        <div>
-                          <p className="text-body font-medium text-foreground">
-                            {transaction.route}
+              <div className="max-h-64 overflow-y-auto">
+                <div className="divide-y divide-border">
+                  {recentTransactions.map((transaction: any, index: number) => (
+                    <div key={transaction.id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-success rounded-full"></div>
+                          <div>
+                            <p className="text-body font-medium text-foreground">
+                              {transaction.route}
+                            </p>
+                            <p className="text-small text-muted-foreground">
+                              → {transaction.destination}
+                            </p>
+                            <p className="text-caption text-muted-foreground">
+                              {formatDate(transaction.createdAt)}, {formatTime(transaction.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-body font-semibold text-foreground">
+                            {formatAmount(transaction.amount)}
                           </p>
-                          <p className="text-small text-muted-foreground">
-                            → {transaction.destination}
-                          </p>
-                          <p className="text-caption text-muted-foreground">
-                            {formatDate(transaction.createdAt)}, {formatTime(transaction.createdAt)}
-                          </p>
+                          <Badge variant="secondary" className="text-caption bg-green-100 text-success mt-1">
+                            Paid
+                          </Badge>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-body font-semibold text-foreground">
-                          {formatAmount(transaction.amount)}
-                        </p>
-                        <Badge variant="secondary" className="text-caption bg-green-100 text-success mt-1">
-                          Paid
-                        </Badge>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="p-8 text-center">
